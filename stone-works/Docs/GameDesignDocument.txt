@@ -196,18 +196,10 @@ For each resource:
 * What is its purpose?
 
 Potential StoneWorks resources:
-
-* Stone
-* Coal
-* Iron
-* Copper
-* Gold
-* Diamonds
-* Other gems
-* Processed materials
-* Money
-* Energy
-* Machine parts
+Sand
+Gems
+Stones
+Money
 
 ---
 

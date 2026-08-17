@@ -1,3 +1,12 @@
+TechnicalArchitecture.txt is the authority for:
+
+* system responsibilities
+* architectural rules
+* communication rules
+* ownership boundaries
+* system interactions
+
+
 > **Systems own data and rules. Entities represent things in the world. Systems communicate through clear interfaces/events rather than directly controlling everything.**
 
 == ALWAYS WRITE IN COMMENTS AT THE TOP OF A SCRIPT IT'S ROLES, RULES AND DEPENDENCIES ==
@@ -27,13 +36,33 @@ Starting Major Systems:
     Rendering
        │
        UI
-```
+
 
 There's an important distinction:
 
 **Rendering should not own gameplay.**
 
 A gem's visual representation shouldn't decide whether the gem exists, how much it is worth, or whether it belongs in the warehouse.
+
+---
+
+Game
+→ coordinates the whole application
+
+GameState
+→ contains persistent/current game state
+
+SimulationSystem
+→ advances game time and tells systems to update
+
+World
+→ contains the physical game world
+
+Systems
+→ contain gameplay rules
+
+Entities
+→ represent things existing in the world
 
 ---
 

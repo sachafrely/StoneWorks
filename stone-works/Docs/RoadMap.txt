@@ -1,6 +1,6 @@
 Define core gameplay loop DONE
 Define map and world structure
-Define resources and 7 gem colors
+Define resources and 6 gem colors
 Define worker roles and behavior
 Define mining system
 Define grid-based mine terrain
