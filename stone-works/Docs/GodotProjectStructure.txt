@@ -1,0 +1,137 @@
+For this game, I’d structure the Godot project around systems, while keeping scenes/assets separate from C# scripts.
+
+A good starting structure would be:
+
+GemMining/
+│
+├── project.godot
+│
+├── Scenes/
+│   ├── Main/
+│   │   └── Main.tscn
+│   │
+│   ├── World/
+│   │   ├── World.tscn
+│   │   ├── Mine.tscn
+│   │   └── Warehouse.tscn
+│   │
+│   ├── Workers/
+│   │   └── Worker.tscn
+│   │
+│   ├── Machines/
+│   │   ├── ProcessingMachine.tscn
+│   │   └── ...
+│   │
+│   ├── Resources/
+│   │   ├── Stone.tscn
+│   │   └── Gem.tscn
+│   │
+│   └── UI/
+│       ├── MainUI.tscn
+│       ├── MarketUI.tscn
+│       ├── WorkersUI.tscn
+│       ├── UpgradeUI.tscn
+│       └── PrestigeUI.tscn
+│
+├── Scripts/
+│   │
+│   ├── Core/
+│   │   ├── Game.cs
+│   │   ├── GameState.cs
+│   │   ├── GameTime.cs
+│   │   └── EventBus.cs
+│   │
+│   ├── World/
+│   │   ├── World.cs
+│   │   ├── WorldGrid.cs
+│   │   ├── Terrain.cs
+│   │   └── Mine.cs
+│   │
+│   ├── Mining/
+│   │   ├── MiningSystem.cs
+│   │   ├── MiningJob.cs
+│   │   └── Dynamite.cs
+│   │
+│   ├── Resources/
+│   │   ├── Resource.cs
+│   │   ├── ResourceData.cs
+│   │   ├── ResourceType.cs
+│   │   └── ResourceManager.cs
+│   │
+│   ├── Physics/
+│   │   ├── PhysicsWorld.cs
+│   │   ├── ResourcePhysics.cs
+│   │   └── PhysicsBody.cs
+│   │
+│   ├── Workers/
+│   │   ├── Worker.cs
+│   │   ├── WorkerManager.cs
+│   │   ├── WorkerAI.cs
+│   │   ├── WorkerMovement.cs
+│   │   ├── WorkerInventory.cs
+│   │   └── WorkerJob.cs
+│   │
+│   ├── Logistics/
+│   │   ├── LogisticsSystem.cs
+│   │   ├── JobSystem.cs
+│   │   ├── TransportJob.cs
+│   │   └── Storage.cs
+│   │
+│   ├── Machines/
+│   │   ├── Machine.cs
+│   │   ├── MachineManager.cs
+│   │   ├── ProcessingMachine.cs
+│   │   └── MachineRecipe.cs
+│   │
+│   ├── Economy/
+│   │   ├── EconomySystem.cs
+│   │   ├── Market.cs
+│   │   ├── GemMarket.cs
+│   │   └── SellingSystem.cs
+│   │
+│   ├── Progression/
+│   │   ├── UpgradeSystem.cs
+│   │   ├── UnlockSystem.cs
+│   │   └── PrestigeSystem.cs
+│   │
+│   ├── Simulation/
+│   │   ├── SimulationSystem.cs
+│   │   └── StatisticsSystem.cs
+│   │
+│   ├── Save/
+│   │   ├── SaveSystem.cs
+│   │   └── SaveData.cs
+│   │
+│   ├── UI/
+│   │   ├── MainUI.cs
+│   │   ├── WorkerUI.cs
+│   │   ├── MarketUI.cs
+│   │   ├── UpgradeUI.cs
+│   │   └── PrestigeUI.cs
+│   │
+│   └── Online/
+│       └── LeaderboardSystem.cs
+│
+├── Assets/
+│   ├── Sprites/
+│   ├── Tilesets/
+│   ├── Workers/
+│   ├── Machines/
+│   ├── Resources/
+│   └── UI/
+│
+├── Data/
+│   ├── Resources/
+│   ├── Machines/
+│   ├── Upgrades/
+│   └── Markets/
+│
+├── Audio/
+│   ├── Music/
+│   └── SFX/
+│
+└── Saves/
+
+I'd keep Scenes/, Scripts/, Assets/, and Data clearly separated.
+
+Also, this is the planned structure, not a commitment that every listed .cs file needs to exist.

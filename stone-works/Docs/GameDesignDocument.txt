@@ -1,0 +1,763 @@
+-- Define core gameplay loop
+
+Assign Workers -> Watch Explosions -> Sell Gems -> Buy more workers -> Sell more Gems -> Upgrade Machines and Warehouse -> 
+Watch Ad -> 2x speed for 5 Minutes or Get 2 Dynamite.
+Prestige -> Unlock Autosell & Permanent Upgrades
+Get Dynamite -> Click on Mine to make big explosion.
+
+-- Define map and world structure
+The Mine is on the Left. It extends to the Left.
+We need to figure out how to make it so that it can continue forever. 
+It can't get infinetly deeper (horizontally), because that would break game balance (too much time walking).
+Maybe they exit the mine and it gets reset. (They open a new mine)
+The Mining field uses a grid and has a Rendered Surface with rounded edges to make the form more beautiful.
+To the Right of the Mining field comes the Machine.
+Then on the Right of the Machine comes the Warehouse with the 6 Gem Colors each by another.
+
+Then there is the Sand collector. Where you can bring sand to build a Tower.
+
+-- Define resources and 6 gem colors
+
+There are 6 Gem Colors.
+Red, Orange, Yellow, Green, Blue, Purple
+
+We want to make the gems by coloring in a single sprite. But we can also make 6 sprites with GIMP. Needs to be decided.
+
+There are also Stones.
+Stones come from Mining. They contain Gems but they must first be grinded.
+When grinding, there is also Sand produced.
+Sand needs to be defined still.
+
+--Define worker roles and behavior
+
+There are two Roles. Mining and Logistics.
+Miners make the mine deeper. They use explosives. They can't carry Resources.
+Logistics transports Resources. They carry Resources around and make order. Sorting the Gems and transporting the Sand away.
+You start with two workers.
+You can have up to 20 workers.
+You can unlock 
+
+-- Define mining system
+The explosions have a randomized Form and destroy tiles on the grid. 
+Then there is a hole there, and all Floating/Illogical grid Tiles are also destroyed during explosion.
+Every tile that is destroyed spawns resources. Every tile spawns 1 Stone.
+The stone will spawn where the tile was destroyed and fall on the ground by gravity.
+
+
+Define grid-based mine terrain
+Define dynamite mining
+Define resource physics and collisions
+-- Define worker movement and climbing
+
+Workers can walk EVERYWHERE. they can climb up and down anywhere. They must be able to always traverse the mining field.
+They can not walk through terrain thought.
+
+Define logistics and job system
+There is a Panel where you can Move your workers around. 
+On the Left of that you will see the Mining Workers amount, shown as individual workers.
+And on the right you see the Logistics workers accordingly.
+There are two arrows. Arrow Left moves 1 worker from Logistics to Mining.
+Arrow Right moves 1 worker from Mining to Logistics. 
+
+Define warehouse and storage
+
+There are 6 Warehouses. For the 6 Gem colors. They are near each other, Order from right to left: Red, Orange, Yellow, Green, Blue, Purple
+They are pretty high. Workers climb to the top of them and drop a gem inside. They have a filled background and look like a closed building.
+
+Define machines and processing
+
+-- Define gem sorting
+
+The workers will take whatever gem, and walk to the correct Warehouse. Throw it in there, and walk to the next item it wants to pick up.
+
+
+-- Define selling system
+
+-- Define fluctuating gem market
+
+Market Fluctuates similarly to the Game SlimeRancher. 
+The market price goes down considerably after you sell.
+there is also a slight random fluctuation.
+And the price always stabilizes back up on the original defined price.
+It is worth to save gems and sell a lot at once.
+
+MAYBE make it so that of the 6 gems, 1 has a standard price of 10, 1 of 9, etc. until 5. so gem Number 6 has a value of 5.
+And then every now and then the "Base price" flips around, and another Gem is the most valuable, and to that number will the price stabilize to.
+This creates a new layer and a new high value gem every hour or so. 
+(WE NEED TO THINK ABOUT THIS MORE) It's not making a lot of sense now.
+
+-- Define upgrades and unlocks
+Machine Upgrade makes it more effective. (Faster processing)
+
+
+-- Define worker progression
+You can have more workers, that's it.
+
+Define prestige/rebirth system
+
+You have the Sand tower that you build in the Background, that extends. This stays.
+
+--Define idle/offline progression
+
+
+-- Define Android UI and full-screen strategy
+
+It should scale to any Android Size. 
+If the Phone is Higher, It should just extend the Blue Sky Background on top, and move the UI up accordingly. So there is more space but the same Game area.
+If the phone is Wider, It should make the UI Wider, but not higher, and also zoom out of the map so that you see the total height of the game. But a wider Sice of the map.
+
+
+## 1. Game Vision
+
+* What is the game called? StoneWorks
+* What is the one-sentence description? Idle Mining and Gem Selling Game
+* What is the core fantasy? I like shiny gemstones.
+* What should the player *feel* while playing? He should feel advancement and richness without doing anything.
+* What makes the game interesting? The color sorting is beautiful. The physics and explosions are satisfying.
+* What makes it different from other games? 
+* Who is the target player? People like me. I don't know.
+* What platform(s) is it for? Android mainly. 
+* Portrait or landscape? Portrait
+* Offline or online? Mainly Offline
+* What is the intended session length?
+* Is it an idle game, incremental game, simulation, management game, or hybrid? Hybrid of all those.
+* What is the overall long-term goal?
+
+# 2. Core Gameplay Loop
+
+* What does the player do?
+* What happens automatically?
+* What does the player collect?
+* What does the player spend?
+* What improves?
+* What unlocks?
+* What repeats?
+
+
+**Mine → rocks/gems appear → physics moves them → machine processes them → player receives resources → upgrades machine → mine more efficiently → unlock better materials → repeat**
+
+Questions:
+
+* What is the primary action?
+* What is the primary reward?
+* What is the short-term loop?
+* What is the medium-term loop?
+* What is the long-term loop?
+* Where does progression happen?
+* Where does player choice happen?
+
+---
+
+# 3. Game World
+
+* What is StoneWorks' world?
+* Where does mining happen?
+* Is there one machine or many?
+* Is there a mine?
+* Is the world physically simulated?
+* What exists inside the world?
+* What is static?
+* What is dynamic?
+* What can interact with what?
+* Does the world expand?
+* Are there different environments?
+* Does the environment affect gameplay?
+
+---
+
+# 4. Player
+
+* Who is the player?
+* Does the player control a character, machine, company, or simply the simulation?
+* What can the player directly control?
+* What can they indirectly influence?
+* Can they move anything?
+* Can they activate machines?
+* Can they change settings?
+* Can they choose what to mine?
+* Can they customize the factory?
+
+---
+
+# 5. Resources
+
+Define **every important resource**.
+
+For each resource:
+
+* What is it?
+* Where does it come from?
+* Where does it go?
+* How much can be stored?
+* Can it be sold?
+* Can it be processed?
+* Can it be combined?
+* Can it be upgraded?
+* What is its purpose?
+
+Potential StoneWorks resources:
+
+* Stone
+* Coal
+* Iron
+* Copper
+* Gold
+* Diamonds
+* Other gems
+* Processed materials
+* Money
+* Energy
+* Machine parts
+
+---
+
+# 6. Mining System
+
+* How does mining work?
+* Is mining automatic?
+* How frequently does mining occur?
+* What determines what is found?
+* Are resources random?
+* Are there different rarity levels?
+* Does depth matter?
+* Does location matter?
+* Can mining efficiency be upgraded?
+* Can new materials be unlocked?
+* Can special discoveries occur?
+
+---
+
+# 7. Physics System
+
+Since StoneWorks has physics, this deserves its own section.
+
+* What objects have physics?
+* Do stones collide with each other?
+* Do gems collide with each other?
+* Do they collide with machines?
+* Do they collide with the ground?
+* Do different materials have different mass?
+* Do different materials have different friction?
+* Do objects bounce?
+* Can objects break?
+* Can objects roll?
+* Can objects get stuck?
+* How accurate does the physics need to be?
+* What happens when many objects exist simultaneously?
+
+Also define the **physics abstraction level**.
+
+For example:
+
+> The game should feel physically believable rather than simulate real-world physics perfectly.
+
+That distinction is important for performance.
+
+---
+
+# 8. Machines
+
+For every machine:
+
+* What does it do?
+* What goes into it?
+* What comes out?
+* How fast does it operate?
+* Does it consume resources?
+* Does it have upgrades?
+* Can it malfunction?
+* Can objects physically interact with it?
+* Does it have animations?
+* Does it have sounds?
+* Can the player configure it?
+
+Potential machines:
+
+* Mining machine
+* Crusher
+* Sorter
+* Conveyor
+* Furnace
+* Gem cutter
+* Storage
+* Pump
+* Separator
+* Generator
+
+---
+
+# 9. Progression
+
+* What does the player unlock?
+* What happens after 5 minutes?
+* 30 minutes?
+* 2 hours?
+* 10 hours?
+* 10 days?
+* What is the progression curve?
+* Are upgrades linear?
+* Are there branching upgrades?
+* Are there technology tiers?
+* Are there prestige/reset mechanics?
+* Is there an endgame?
+
+---
+
+# 10. Economy
+
+This becomes extremely important for an incremental/idle game.
+
+For every currency/resource:
+
+* How is it generated?
+* How quickly is it generated?
+* How is it spent?
+* What are the major costs?
+* What is the expected income?
+* What is the expected upgrade cost?
+* How quickly should the player afford upgrades?
+* Are resources capped?
+* Can resources be lost?
+
+You eventually want to be able to answer:
+
+> **Why doesn't the player become infinitely rich too quickly?**
+
+and
+
+> **Why doesn't progression become unbearably slow?**
+
+---
+
+# 11. Upgrades
+
+For every upgrade:
+
+* What does it improve?
+* How much does it cost?
+* Is it permanent?
+* Is it additive or multiplicative?
+* What does it unlock?
+* Does it create new gameplay?
+* Can it be upgraded repeatedly?
+* What is the maximum level?
+
+Examples:
+
+* Mining speed
+* Mining quantity
+* Rare gem chance
+* Machine speed
+* Conveyor speed
+* Storage capacity
+* Physics efficiency
+* Processing efficiency
+
+---
+
+# 12. Player Decisions
+
+A good GDD should explicitly identify where the player makes meaningful decisions.
+
+Ask:
+
+* What choices does the player make?
+* Which choices have consequences?
+* Are there multiple viable strategies?
+* Can players specialize?
+* Can they optimize?
+* Can they experiment?
+* Can they make mistakes?
+
+This prevents the game from becoming:
+
+> "Numbers automatically go up."
+
+---
+
+# 13. UI / UX
+
+Define every screen/window.
+
+* Main game screen
+* Settings
+* Statistics
+* Upgrade screen
+* Inventory
+* Shop
+* Machine configuration
+* Resource display
+* Notifications
+* Tutorial
+* Pause menu
+
+For every UI element:
+
+* Why does it exist?
+* What information does it show?
+* Can it be opened/closed?
+* What other windows can be open simultaneously?
+* What happens when two windows conflict?
+
+This is particularly useful for the architecture you're currently building in Godot.
+
+---
+
+# 14. Art Direction
+
+* What visual style?
+* Pixel art?
+* Resolution?
+* Pixel size?
+* Camera perspective?
+* Lighting?
+* UI style?
+* Animation style?
+* Particle effects?
+* How detailed are objects?
+* What makes something visually recognizable?
+
+For StoneWorks, I'd explicitly define the **pixel-art rules** rather than leaving them implicit.
+
+---
+
+# 15. Audio
+
+* Music?
+* Ambient sounds?
+* Mining sounds?
+* Rock impacts?
+* Machine sounds?
+* UI sounds?
+* Rare-gem sounds?
+* Upgrade sounds?
+* Notifications?
+* Volume controls?
+
+---
+
+# 16. Technical Design
+
+This is where your current experience with Infinite-Water becomes extremely useful.
+
+Questions:
+
+* Which engine?
+* Which language?
+* Target FPS?
+* Target hardware?
+* Target resolution?
+* How much physics?
+* How many objects can exist?
+* How are objects spawned?
+* How are objects destroyed?
+* How are systems communicated?
+* What is responsible for what?
+* What data is persistent?
+* What data is temporary?
+* How is saving handled?
+* How is loading handled?
+* How are upgrades stored?
+* How are events communicated?
+
+---
+
+# 17. Code Architecture
+
+I'd give this its own section for StoneWorks.
+
+Define:
+
+### Core systems
+
+* GameManager
+* SimulationManager
+* ResourceManager
+* EconomyManager
+* ProgressionManager
+* SaveManager
+* SettingsManager
+* AudioManager
+
+### Simulation systems
+
+* MiningSystem
+* PhysicsSystem
+* MachineSystem
+* ProcessingSystem
+* ConveyorSystem
+* GemSystem
+
+### UI systems
+
+* UIManager
+* WindowManager
+* StatisticsWindow
+* SettingsWindow
+* UpgradeWindow
+
+Then answer:
+
+> Who is allowed to talk to whom?
+
+This is where your **"systems and communication"** plan belongs.
+
+---
+
+# 18. Saving / Loading
+
+* What is saved?
+* How often?
+* Manual save?
+* Automatic save?
+* What happens if the game closes?
+* What happens while offline?
+* Is offline progress calculated?
+* How is save corruption handled?
+* Can there be multiple save slots?
+
+---
+
+# 19. Offline / Idle Progression
+
+If StoneWorks is an idle game, this is essential.
+
+* Does production continue while offline?
+* For how long?
+* Are there limits?
+* Are physics simulations actually run while offline?
+* Or is production calculated mathematically?
+* What happens to machines?
+* What resources are generated?
+* Are rare events possible offline?
+
+---
+
+# 20. Statistics
+
+This can become surprisingly important.
+
+* What statistics does the game track?
+* Total mined?
+* Total gems?
+* Highest-value gem?
+* Production/minute?
+* Machine efficiency?
+* Play time?
+* Money earned?
+* Resources processed?
+* Maximum simultaneous objects?
+
+And:
+
+> Which statistics are purely informational, and which influence gameplay?
+
+---
+
+# 21. Events / Randomness
+
+* Are there random events?
+* Rare gems?
+* Huge stones?
+* Cave-ins?
+* Machine failures?
+* Bonus deposits?
+* Lucky discoveries?
+* Special minerals?
+* Weather?
+* Events triggered by progression?
+
+---
+
+# 22. Tutorial / Onboarding
+
+* What does the player see first?
+* What happens in the first 10 seconds?
+* First minute?
+* First upgrade?
+* When does the player understand the core loop?
+* What mechanics are introduced gradually?
+* What information can be discovered without a tutorial?
+
+---
+
+# 23. Monetization
+
+If relevant:
+
+* Premium game?
+* Free?
+* Ads?
+* Purchases?
+* Cosmetic purchases?
+* DLC?
+* No monetization?
+
+Even if the answer is **"none"**, put it in the GDD.
+
+---
+
+# 24. Accessibility
+
+* Text size?
+* Colorblind support?
+* Reduced effects?
+* Reduced screen shake?
+* Sound controls?
+* Touch controls?
+* Mouse/keyboard?
+* Controller?
+* One-handed mobile interaction?
+
+---
+
+# 25. Platforms & Controls
+
+* PC?
+* Android?
+* iOS?
+* Steam?
+* Web?
+
+Then:
+
+* Mouse?
+* Touch?
+* Keyboard?
+* Controller?
+* Portrait?
+* Landscape?
+
+---
+
+# 26. Performance Requirements
+
+Especially relevant to you.
+
+Define targets such as:
+
+* Target FPS
+* Maximum simultaneous rocks
+* Maximum simultaneous gems
+* Maximum machines
+* Maximum particles/effects
+* Maximum physics bodies
+* Memory target
+* Loading-time target
+* Mobile performance target
+
+And:
+
+> What happens when the simulation becomes overloaded?
+
+You already learned from Infinite-Water that this question is worth answering **before** you need an anti-lag system.
+
+---
+
+# 27. Content
+
+Create inventories of:
+
+* Materials
+* Gems
+* Stones
+* Machines
+* Upgrades
+* Environments
+* Achievements
+* Events
+* UI screens
+* Sounds
+* Music
+* Effects
+
+This turns the GDD into something you can actually build from.
+
+---
+
+# 28. Achievements / Goals
+
+* What milestones exist?
+* What rewards do they provide?
+* Are they purely cosmetic?
+* Are there hidden achievements?
+* Are there long-term challenges?
+
+---
+
+# 29. Failure / Success
+
+Even an idle game needs this defined.
+
+* Can the player lose?
+* Can machines break?
+* Can the player run out of something?
+* Can they make a bad investment?
+* Is there a game-over?
+* What constitutes "winning"?
+* Is there an ultimate goal?
+
+---
+
+# 30. Endgame
+
+This is often forgotten.
+
+* What happens after everything is unlocked?
+* Is there prestige?
+* Infinite upgrades?
+* New mines?
+* New worlds?
+* Optimization?
+* Collection?
+* Leaderboards?
+* Sandbox mode?
+
+---
+
+# 31. Development Roadmap
+
+Finally:
+
+* What must exist for the first playable prototype?
+* What is the MVP?
+* What is Phase 1?
+* Phase 2?
+* Phase 3?
+* What can be postponed?
+* What features are optional?
+* What features are experimental?
+
+And importantly:
+
+> **What must NOT be built yet?**
+
+That last question can save enormous amounts of time.
+
+---
+
+# The GDD's "master questions"
+
+If you want a much simpler way to think about the whole document, your GDD should eventually answer these **15 questions**:
+
+1. **What is the game?**
+2. **Why is it fun?**
+3. **Who is it for?**
+4. **What does the player do?**
+5. **What is the core gameplay loop?**
+6. **What can the player control?**
+7. **What systems exist?**
+8. **How do those systems communicate?**
+9. **What resources exist?**
+10. **How does progression work?**
+11. **What content exists?**
+12. **What does the game look and sound like?**
+13. **How does the player interact with it?**
+14. **What technical constraints must the game satisfy?**
+15. **What exactly needs to be built, and in what order?**
+
+For **StoneWorks specifically**, I would *not* try to write the giant GDD all at once. I'd build it in layers:
+
+**Vision → Core Loop → Resources → Mining → Physics → Machines → Progression → Economy → UI → Architecture → Content → Technical Requirements → Roadmap**
+
+That would give you a GDD that is actually useful for development rather than a huge document full of ideas that aren't yet decided.
