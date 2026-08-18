@@ -1,755 +1,640 @@
--- Define core gameplay loop
+STONEWORKS — GAME DESIGN DOCUMENT
+=================================
 
-Assign Workers -> Watch Explosions -> Sell Gems -> Buy more workers -> Sell more Gems -> Upgrade Machines and Warehouse -> 
-Watch Ad -> 2x speed for 5 Minutes or Get 2 Dynamite.
-Prestige -> Unlock Autosell & Permanent Upgrades
-Get Dynamite -> Click on Mine to make big explosion.
+Purpose
+-------
+This document defines what StoneWorks is and how it should play.
+It describes game rules, player experience, content and major design decisions.
+Technical implementation, code ownership and system communication belong in TechnicalArchitecture.txt.
+Physical file/folder organization belongs in GodotProjectStructure.txt.
 
--- Define map and world structure
-The Mine is on the Left. It extends to the Left.
-We need to figure out how to make it so that it can continue forever. 
-It can't get infinetly deeper (horizontally), because that would break game balance (too much time walking).
-Maybe they exit the mine and it gets reset. (They open a new mine)
-The Mining field uses a grid and has a Rendered Surface with rounded edges to make the form more beautiful.
-To the Right of the Mining field comes the Machine.
-Then on the Right of the Machine comes the Warehouse with the 6 Gem Colors each by another.
 
-Then there is the Sand collector. Where you can bring sand to build a Tower.
+1. GAME VISION
+--------------
 
--- Define resources and 6 gem colors
+StoneWorks is a portrait Android idle/incremental mining and management game.
 
-There are 6 Gem Colors.
-Red, Orange, Yellow, Green, Blue, Purple
+Core fantasy:
+- Build a profitable mining operation.
+- Watch satisfying explosions, falling rocks and gems, machines and workers.
+- Collect beautiful colored gemstones and become increasingly wealthy.
+- Feel meaningful progress even while doing very little manually.
 
-We want to make the gems by coloring in a single sprite. But we can also make 6 sprites with GIMP. Needs to be decided.
+The game should feel:
+- satisfying
+- relaxing
+- rewarding
+- visually alive
+- progressively richer and more powerful
 
-There are also Stones.
-Stones come from Mining. They contain Gems but they must first be grinded.
-When grinding, there is also Sand produced.
-Sand needs to be defined still.
+The main visual attractions are colorful gem sorting, physical stones/gems, explosions and the growing Sand Tower.
 
---Define worker roles and behavior
+Target platform: Android first.
+Orientation: Portrait.
+Primary mode: Offline / single-player.
+Genre: Idle + incremental + simulation + management.
 
-There are two Roles. Mining and Logistics.
-Miners make the mine deeper. They use explosives. They can't carry Resources.
-Logistics transports Resources. They carry Resources around and make order. Sorting the Gems and transporting the Sand away.
-You start with two workers.
-You can have up to 20 workers.
-You can unlock 
 
--- Define mining system
-The explosions have a randomized Form and destroy tiles on the grid. 
-Then there is a hole there, and all Floating/Illogical grid Tiles are also destroyed during explosion.
-Every tile that is destroyed spawns resources. Every tile spawns 1 Stone.
-The stone will spawn where the tile was destroyed and fall on the ground by gravity.
+2. CORE GAMEPLAY LOOP
+---------------------
 
+Primary loop:
 
-Define grid-based mine terrain
-Define dynamite mining
-Define resource physics and collisions
--- Define worker movement and climbing
+Mine → stones appear → physics moves resources → machines process stones → gems/sand are produced → logistics workers transport resources → sell gems → buy workers/upgrades → mine more efficiently → repeat.
 
-Workers can walk EVERYWHERE. they can climb up and down anywhere. They must be able to always traverse the mining field.
-They can not walk through terrain thought.
+Player actions:
+- Assign workers between Mining and Logistics.
+- Trigger dynamite explosions.
+- Buy workers and upgrades.
+- Sell gems.
+- Manage progression and prestige.
+- Watch or interact with the simulation.
 
-Define logistics and job system
-There is a Panel where you can Move your workers around. 
-On the Left of that you will see the Mining Workers amount, shown as individual workers.
-And on the right you see the Logistics workers accordingly.
-There are two arrows. Arrow Left moves 1 worker from Logistics to Mining.
-Arrow Right moves 1 worker from Mining to Logistics. 
+Automatic activity:
+- Mining workers perform mining jobs.
+- Logistics workers transport resources.
+- Stones and gems fall and collide physically.
+- Machines process resources.
+- The market changes over time.
+- Idle/offline production continues according to the final offline rules.
 
-Define warehouse and storage
+The game must contain meaningful choices rather than only automatic number growth.
 
-There are 6 Warehouses. For the 6 Gem colors. They are near each other, Order from right to left: Red, Orange, Yellow, Green, Blue, Purple
-They are pretty high. Workers climb to the top of them and drop a gem inside. They have a filled background and look like a closed building.
 
-Define machines and processing
+3. WORLD
+--------
 
--- Define gem sorting
+The main scene is a horizontal industrial mining area presented in portrait view.
 
-The workers will take whatever gem, and walk to the correct Warehouse. Throw it in there, and walk to the next item it wants to pick up.
+From left to right:
+1. Mine / mining field
+2. Processing machine area
+3. Six gem warehouses
+4. Sand collection / Sand Tower area
 
+The mine uses a grid for terrain gameplay data. Its visible terrain is a rounded, attractive representation of that grid.
 
--- Define selling system
+The mine should support continued progression without requiring an infinitely long walk. The exact long-term mine-expansion/reset model is still undecided.
 
--- Define fluctuating gem market
+World objects include:
+- terrain
+- workers
+- stones
+- gems
+- machines
+- warehouses
+- sand storage/tower
 
-Market Fluctuates similarly to the Game SlimeRancher. 
-The market price goes down considerably after you sell.
-there is also a slight random fluctuation.
-And the price always stabilizes back up on the original defined price.
-It is worth to save gems and sell a lot at once.
+The world should feel physically connected: resources fall, collide and accumulate rather than appearing as purely abstract numbers.
 
-MAYBE make it so that of the 6 gems, 1 has a standard price of 10, 1 of 9, etc. until 5. so gem Number 6 has a value of 5.
-And then every now and then the "Base price" flips around, and another Gem is the most valuable, and to that number will the price stabilize to.
-This creates a new layer and a new high value gem every hour or so. 
-(WE NEED TO THINK ABOUT THIS MORE) It's not making a lot of sense now.
 
--- Define upgrades and unlocks
-Machine Upgrade makes it more effective. (Faster processing)
+4. RESOURCES
+------------
 
+Primary resources:
+- Stones
+- Gems
+- Sand
+- Money
+- Dynamite
 
--- Define worker progression
-You can have more workers, that's it.
+Gems have six colors:
+- Red
+- Orange
+- Yellow
+- Green
+- Blue
+- Purple
 
-Define prestige/rebirth system
+Stones are produced by mining. A stone contains potential gem value and must be processed/grinded before its contents are recovered.
 
-You have the Sand tower that you build in the Background, that extends. This stays.
+Grinding/processing also produces Sand.
 
---Define idle/offline progression
+Resource rules:
+- Logical resource ownership is separate from physical representation.
+- Resources may become physical objects when they enter the world.
+- Stored resources do not need to remain physical objects.
 
+Exact stone composition, gem probabilities, sand yield and resource tiers remain to be balanced.
 
--- Define Android UI and full-screen strategy
-
-It should scale to any Android Size. 
-If the Phone is Higher, It should just extend the Blue Sky Background on top, and move the UI up accordingly. So there is more space but the same Game area.
-If the phone is Wider, It should make the UI Wider, but not higher, and also zoom out of the map so that you see the total height of the game. But a wider Sice of the map.
 
+5. MINING
+---------
 
-## 1. Game Vision
-
-* What is the game called? StoneWorks
-* What is the one-sentence description? Idle Mining and Gem Selling Game
-* What is the core fantasy? I like shiny gemstones.
-* What should the player *feel* while playing? He should feel advancement and richness without doing anything.
-* What makes the game interesting? The color sorting is beautiful. The physics and explosions are satisfying.
-* What makes it different from other games? 
-* Who is the target player? People like me. I don't know.
-* What platform(s) is it for? Android mainly. 
-* Portrait or landscape? Portrait
-* Offline or online? Mainly Offline
-* What is the intended session length?
-* Is it an idle game, incremental game, simulation, management game, or hybrid? Hybrid of all those.
-* What is the overall long-term goal?
-
-# 2. Core Gameplay Loop
-
-* What does the player do?
-* What happens automatically?
-* What does the player collect?
-* What does the player spend?
-* What improves?
-* What unlocks?
-* What repeats?
-
-
-**Mine → rocks/gems appear → physics moves them → machine processes them → player receives resources → upgrades machine → mine more efficiently → unlock better materials → repeat**
-
-Questions:
-
-* What is the primary action?
-* What is the primary reward?
-* What is the short-term loop?
-* What is the medium-term loop?
-* What is the long-term loop?
-* Where does progression happen?
-* Where does player choice happen?
-
----
-
-# 3. Game World
+Mining is performed by Mining workers using explosives.
 
-* What is StoneWorks' world?
-* Where does mining happen?
-* Is there one machine or many?
-* Is there a mine?
-* Is the world physically simulated?
-* What exists inside the world?
-* What is static?
-* What is dynamic?
-* What can interact with what?
-* Does the world expand?
-* Are there different environments?
-* Does the environment affect gameplay?
-
----
-
-# 4. Player
-
-* Who is the player?
-* Does the player control a character, machine, company, or simply the simulation?
-* What can the player directly control?
-* What can they indirectly influence?
-* Can they move anything?
-* Can they activate machines?
-* Can they change settings?
-* Can they choose what to mine?
-* Can they customize the factory?
-
----
-
-# 5. Resources
-
-Define **every important resource**.
-
-For each resource:
-
-* What is it?
-* Where does it come from?
-* Where does it go?
-* How much can be stored?
-* Can it be sold?
-* Can it be processed?
-* Can it be combined?
-* Can it be upgraded?
-* What is its purpose?
-
-Potential StoneWorks resources:
-Sand
-Gems
-Stones
-Money
-
----
-
-# 6. Mining System
-
-* How does mining work?
-* Is mining automatic?
-* How frequently does mining occur?
-* What determines what is found?
-* Are resources random?
-* Are there different rarity levels?
-* Does depth matter?
-* Does location matter?
-* Can mining efficiency be upgraded?
-* Can new materials be unlocked?
-* Can special discoveries occur?
-
----
-
-# 7. Physics System
-
-Since StoneWorks has physics, this deserves its own section.
-
-* What objects have physics?
-* Do stones collide with each other?
-* Do gems collide with each other?
-* Do they collide with machines?
-* Do they collide with the ground?
-* Do different materials have different mass?
-* Do different materials have different friction?
-* Do objects bounce?
-* Can objects break?
-* Can objects roll?
-* Can objects get stuck?
-* How accurate does the physics need to be?
-* What happens when many objects exist simultaneously?
-
-Also define the **physics abstraction level**.
-
-For example:
-
-> The game should feel physically believable rather than simulate real-world physics perfectly.
-
-That distinction is important for performance.
-
----
-
-# 8. Machines
-
-For every machine:
-
-* What does it do?
-* What goes into it?
-* What comes out?
-* How fast does it operate?
-* Does it consume resources?
-* Does it have upgrades?
-* Can it malfunction?
-* Can objects physically interact with it?
-* Does it have animations?
-* Does it have sounds?
-* Can the player configure it?
-
-Potential machines:
-
-* Mining machine
-* Crusher
-* Sorter
-* Conveyor
-* Furnace
-* Gem cutter
-* Storage
-* Pump
-* Separator
-* Generator
+Dynamite:
+- creates an explosion in the mine
+- has a randomized explosion shape
+- destroys affected terrain-grid cells
+- causes unsupported/invalid terrain to collapse or be removed according to the mine rules
+- creates resources from destroyed terrain
 
----
+Initial rule:
+- Every destroyed terrain tile produces one Stone.
 
-# 9. Progression
-
-* What does the player unlock?
-* What happens after 5 minutes?
-* 30 minutes?
-* 2 hours?
-* 10 hours?
-* 10 days?
-* What is the progression curve?
-* Are upgrades linear?
-* Are there branching upgrades?
-* Are there technology tiers?
-* Are there prestige/reset mechanics?
-* Is there an endgame?
-
----
+Stones spawn at the destroyed location and fall under gravity.
 
-# 10. Economy
+Mining must eventually define:
+- terrain types
+- mining depth/progression
+- resource probabilities
+- dynamite costs and availability
+- explosion size/shape rules
+- how unsupported terrain is determined
+- how the mine expands or resets
 
-This becomes extremely important for an incremental/idle game.
 
-For every currency/resource:
+6. PHYSICS
+----------
 
-* How is it generated?
-* How quickly is it generated?
-* How is it spent?
-* What are the major costs?
-* What is the expected income?
-* What is the expected upgrade cost?
-* How quickly should the player afford upgrades?
-* Are resources capped?
-* Can resources be lost?
-
-You eventually want to be able to answer:
-
-> **Why doesn't the player become infinitely rich too quickly?**
+Physics exists primarily to make the game satisfying, readable and believable.
+It does not need to be a perfect real-world simulation.
 
-and
+Physical interactions include:
+- stones with the ground
+- stones with other stones
+- gems with the ground
+- gems with other gems
+- resources with relevant machine/environment geometry
+- workers with terrain and world geometry
 
-> **Why doesn't progression become unbearably slow?**
+Objects may fall, roll, collide and settle.
 
----
-
-# 11. Upgrades
-
-For every upgrade:
-
-* What does it improve?
-* How much does it cost?
-* Is it permanent?
-* Is it additive or multiplicative?
-* What does it unlock?
-* Does it create new gameplay?
-* Can it be upgraded repeatedly?
-* What is the maximum level?
+Performance is more important than perfect physical accuracy. The game should remain responsive on target Android hardware when many resources are present.
 
-Examples:
+The exact maximum simultaneous physical objects and overload behavior are development constraints to be established during implementation/testing.
 
-* Mining speed
-* Mining quantity
-* Rare gem chance
-* Machine speed
-* Conveyor speed
-* Storage capacity
-* Physics efficiency
-* Processing efficiency
-
----
-
-# 12. Player Decisions
-
-A good GDD should explicitly identify where the player makes meaningful decisions.
-
-Ask:
-
-* What choices does the player make?
-* Which choices have consequences?
-* Are there multiple viable strategies?
-* Can players specialize?
-* Can they optimize?
-* Can they experiment?
-* Can they make mistakes?
-
-This prevents the game from becoming:
 
-> "Numbers automatically go up."
-
----
-
-# 13. UI / UX
-
-Define every screen/window.
-
-* Main game screen
-* Settings
-* Statistics
-* Upgrade screen
-* Inventory
-* Shop
-* Machine configuration
-* Resource display
-* Notifications
-* Tutorial
-* Pause menu
-
-For every UI element:
-
-* Why does it exist?
-* What information does it show?
-* Can it be opened/closed?
-* What other windows can be open simultaneously?
-* What happens when two windows conflict?
-
-This is particularly useful for the architecture you're currently building in Godot.
-
----
+7. WORKERS
+----------
 
-# 14. Art Direction
+There are two worker roles:
 
-* What visual style?
-* Pixel art?
-* Resolution?
-* Pixel size?
-* Camera perspective?
-* Lighting?
-* UI style?
-* Animation style?
-* Particle effects?
-* How detailed are objects?
-* What makes something visually recognizable?
-
-For StoneWorks, I'd explicitly define the **pixel-art rules** rather than leaving them implicit.
+Mining
+- perform mining jobs
+- use dynamite
+- do not carry resources
 
----
+Logistics
+- carry resources
+- collect processed resources
+- deliver resources to storage
+- sort gems into the correct warehouses
+- transport Sand to its destination
 
-# 15. Audio
+Starting workers: 2.
+Maximum planned workers: 20.
 
-* Music?
-* Ambient sounds?
-* Mining sounds?
-* Rock impacts?
-* Machine sounds?
-* UI sounds?
-* Rare-gem sounds?
-* Upgrade sounds?
-* Notifications?
-* Volume controls?
+The player can move workers between roles through the worker panel:
+- left arrow: Logistics → Mining
+- right arrow: Mining → Logistics
 
----
+Workers must be able to traverse the mine, including climbing up and down terrain, while respecting terrain collision.
 
-# 16. Technical Design
+Worker progression currently focuses on increasing worker count. Additional worker abilities are optional future design.
 
-This is where your current experience with Infinite-Water becomes extremely useful.
 
-Questions:
+8. JOBS AND LOGISTICS
+---------------------
 
-* Which engine?
-* Which language?
-* Target FPS?
-* Target hardware?
-* Target resolution?
-* How much physics?
-* How many objects can exist?
-* How are objects spawned?
-* How are objects destroyed?
-* How are systems communicated?
-* What is responsible for what?
-* What data is persistent?
-* What data is temporary?
-* How is saving handled?
-* How is loading handled?
-* How are upgrades stored?
-* How are events communicated?
+Mining and Logistics are different gameplay domains.
 
----
+Mining creates mining work.
+Logistics determines what should be transported and creates transport work.
+A generic Job System handles job lifecycle and assignment.
 
-# 17. Code Architecture
-
-I'd give this its own section for StoneWorks.
-
-Define:
-
-### Core systems
+Typical logistics flow:
 
-* GameManager
-* SimulationManager
-* ResourceManager
-* EconomyManager
-* ProgressionManager
-* SaveManager
-* SettingsManager
-* AudioManager
-
-### Simulation systems
-
-* MiningSystem
-* PhysicsSystem
-* MachineSystem
-* ProcessingSystem
-* ConveyorSystem
-* GemSystem
+Resource becomes available
+→ logistics identifies required destination
+→ transport job is created
+→ worker claims job
+→ worker collects resource
+→ worker carries resource
+→ worker delivers resource
+→ resource enters storage/processing flow.
 
-### UI systems
+The player primarily influences logistics by choosing the number of Logistics workers.
 
-* UIManager
-* WindowManager
-* StatisticsWindow
-* SettingsWindow
-* UpgradeWindow
 
-Then answer:
+9. MACHINES AND PROCESSING
+--------------------------
 
-> Who is allowed to talk to whom?
+Machines transform resources into more valuable resources or otherwise improve the production chain.
 
-This is where your **"systems and communication"** plan belongs.
+Initial important machine:
+- Grinder / processing machine that processes Stones and produces Gems and Sand.
 
----
+Machine upgrades primarily improve effectiveness, initially through faster processing.
 
-# 18. Saving / Loading
+Potential future machines should only be added when they create meaningful gameplay. Possible examples include:
+- sorter
+- conveyor
+- gem cutter
+- separator
+- furnace
 
-* What is saved?
-* How often?
-* Manual save?
-* Automatic save?
-* What happens if the game closes?
-* What happens while offline?
-* Is offline progress calculated?
-* How is save corruption handled?
-* Can there be multiple save slots?
+Each machine should have a clear input, output, processing rule and upgrade path.
 
----
 
-# 19. Offline / Idle Progression
+10. GEM STORAGE
+---------------
 
-If StoneWorks is an idle game, this is essential.
+There are six dedicated gem warehouses, one for each color.
 
-* Does production continue while offline?
-* For how long?
-* Are there limits?
-* Are physics simulations actually run while offline?
-* Or is production calculated mathematically?
-* What happens to machines?
-* What resources are generated?
-* Are rare events possible offline?
+Order from right to left:
+Red, Orange, Yellow, Green, Blue, Purple.
 
----
+The warehouses are tall structures. Logistics workers climb to the top and drop gems into the corresponding warehouse.
 
-# 20. Statistics
+Storage should be visually readable and satisfying. Exact capacities and whether capacity can be upgraded remain to be decided.
 
-This can become surprisingly important.
 
-* What statistics does the game track?
-* Total mined?
-* Total gems?
-* Highest-value gem?
-* Production/minute?
-* Machine efficiency?
-* Play time?
-* Money earned?
-* Resources processed?
-* Maximum simultaneous objects?
+11. SELLING AND MARKET
+----------------------
 
-And:
+Gems are sold for Money.
 
-> Which statistics are purely informational, and which influence gameplay?
+The intended market behavior is dynamic:
+- each gem has a base value
+- selling a gem causes its current price to fall significantly
+- prices have smaller random fluctuations
+- prices recover toward their base value over time
+- saving gems and selling in larger batches should be a viable strategy
 
----
+A possible system where the highest-value gem rotates periodically was considered, but is NOT currently a confirmed rule.
 
-# 21. Events / Randomness
+The final market model must answer:
+- how often prices update
+- how strongly selling affects price
+- how fast recovery occurs
+- whether gem base values differ
+- whether one gem can become temporarily more valuable than the others
 
-* Are there random events?
-* Rare gems?
-* Huge stones?
-* Cave-ins?
-* Machine failures?
-* Bonus deposits?
-* Lucky discoveries?
-* Special minerals?
-* Weather?
-* Events triggered by progression?
 
----
+12. ECONOMY
+----------
 
-# 22. Tutorial / Onboarding
+Money is the main spending currency.
 
-* What does the player see first?
-* What happens in the first 10 seconds?
-* First minute?
-* First upgrade?
-* When does the player understand the core loop?
-* What mechanics are introduced gradually?
-* What information can be discovered without a tutorial?
+Money is earned by selling Gems.
 
----
+Money is spent on:
+- additional workers
+- machine upgrades
+- other progression systems as they are introduced
 
-# 23. Monetization
+The economy must maintain a satisfying progression curve:
+- early upgrades should arrive frequently
+- later upgrades should require meaningful accumulation
+- production should grow without becoming effectively infinite too quickly
+- progression should not become stalled for unreasonable periods
 
-If relevant:
+Exact prices, production rates and scaling are balancing data, not fixed design yet.
 
-* Premium game?
-* Free?
-* Ads?
-* Purchases?
-* Cosmetic purchases?
-* DLC?
-* No monetization?
 
-Even if the answer is **"none"**, put it in the GDD.
+13. PROGRESSION AND UPGRADES
+----------------------------
 
----
+Primary progression:
+- more workers
+- more effective machines
+- improved mining/processing capability
+- access to later content
 
-# 24. Accessibility
+Machine upgrades currently focus on processing speed.
 
-* Text size?
-* Colorblind support?
-* Reduced effects?
-* Reduced screen shake?
-* Sound controls?
-* Touch controls?
-* Mouse/keyboard?
-* Controller?
-* One-handed mobile interaction?
+Other possible upgrades may affect:
+- mining efficiency
+- dynamite efficiency
+- processing speed
+- storage
+- logistics efficiency
+- gem yield
 
----
+Upgrade effects and costs must be defined as the economy is balanced.
 
-# 25. Platforms & Controls
 
-* PC?
-* Android?
-* iOS?
-* Steam?
-* Web?
+14. PRESTIGE
+-----------
 
-Then:
+Prestige is intended as the long-term reset/progression system.
 
-* Mouse?
-* Touch?
-* Keyboard?
-* Controller?
-* Portrait?
-* Landscape?
+The current concept:
+- normal progression is reset or partially reset
+- permanent progression is retained
+- Prestige unlocks stronger long-term advantages
+- Autosell is one planned prestige unlock
 
----
+The Sand Tower is a persistent visual representation of long-term progress and continues growing across prestige cycles.
 
-# 26. Performance Requirements
+The exact prestige currency, reset scope, permanent upgrades and unlock requirements remain to be designed.
 
-Especially relevant to you.
 
-Define targets such as:
+15. SAND TOWER
+-------------
 
-* Target FPS
-* Maximum simultaneous rocks
-* Maximum simultaneous gems
-* Maximum machines
-* Maximum particles/effects
-* Maximum physics bodies
-* Memory target
-* Loading-time target
-* Mobile performance target
+Sand is transported to a Sand collector and used to build a Tower in the background.
 
-And:
+The Tower is persistent and grows as the player produces/contributes Sand.
 
-> What happens when the simulation becomes overloaded?
+Its primary purpose is currently:
+- visible long-term progression
+- a satisfying persistent reward
+- a visual representation of accumulated production
 
-You already learned from Infinite-Water that this question is worth answering **before** you need an anti-lag system.
+Whether the Tower has additional gameplay effects is undecided.
 
----
 
-# 27. Content
+16. IDLE AND OFFLINE PROGRESSION
+--------------------------------
 
-Create inventories of:
+StoneWorks is primarily an idle game and must support progress without constant interaction.
 
-* Materials
-* Gems
-* Stones
-* Machines
-* Upgrades
-* Environments
-* Achievements
-* Events
-* UI screens
-* Sounds
-* Music
-* Effects
+Offline progress should be calculated rather than simulating every physical object for the entire offline period.
 
-This turns the GDD into something you can actually build from.
+The final design must define:
+- what continues while offline
+- maximum offline duration
+- which resources are generated
+- whether workers continue their assigned jobs
+- how machines progress
+- whether market prices advance
+- how offline rewards are presented when the player returns
 
----
 
-# 28. Achievements / Goals
+17. ADS / OPTIONAL REWARDS
+--------------------------
 
-* What milestones exist?
-* What rewards do they provide?
-* Are they purely cosmetic?
-* Are there hidden achievements?
-* Are there long-term challenges?
+The current monetization concept includes optional rewarded ads.
 
----
+Planned rewards include one of:
+- 2× game speed for 5 minutes
+- 2 Dynamite
 
-# 29. Failure / Success
+Ads should be optional and provide convenience rather than being required for normal progression.
 
-Even an idle game needs this defined.
+The final monetization strategy still needs to be decided, including whether the game is free, ad-supported, paid, or uses additional purchases.
 
-* Can the player lose?
-* Can machines break?
-* Can the player run out of something?
-* Can they make a bad investment?
-* Is there a game-over?
-* What constitutes "winning"?
-* Is there an ultimate goal?
 
----
+18. UI / UX
+-----------
 
-# 30. Endgame
+Primary UI areas:
+- main simulation view
+- worker assignment panel
+- resource/money display
+- machine/upgrades interface
+- market/selling interface
+- prestige interface
+- settings
+- statistics
 
-This is often forgotten.
+The worker panel clearly shows Mining and Logistics worker counts and allows moving individual workers between roles.
 
-* What happens after everything is unlocked?
-* Is there prestige?
-* Infinite upgrades?
-* New mines?
-* New worlds?
-* Optimization?
-* Collection?
-* Leaderboards?
-* Sandbox mode?
+UI presents game state and sends player commands. Gameplay rules remain outside the UI.
 
----
 
-# 31. Development Roadmap
+19. MOBILE LAYOUT
+-----------------
 
-Finally:
+Target: Android portrait.
 
-* What must exist for the first playable prototype?
-* What is the MVP?
-* What is Phase 1?
-* Phase 2?
-* Phase 3?
-* What can be postponed?
-* What features are optional?
-* What features are experimental?
+The game should adapt to different screen sizes without changing the core game area unnecessarily.
 
-And importantly:
+Taller screens:
+- extend the blue-sky/background area
+- move UI as necessary
+- preserve the main simulation presentation
 
-> **What must NOT be built yet?**
+Wider screens:
+- allow UI to become wider without becoming unnecessarily taller
+- show more horizontal world area where possible
+- preserve the intended vertical game composition
 
-That last question can save enormous amounts of time.
+Exact responsive layout rules will be finalized during implementation on multiple Android aspect ratios.
 
----
 
-# The GDD's "master questions"
+20. ART DIRECTION
+-----------------
 
-If you want a much simpler way to think about the whole document, your GDD should eventually answer these **15 questions**:
+Visual direction:
+- pixel-art inspired
+- colorful gemstones
+- clear silhouettes
+- readable machines and workers
+- satisfying explosions and physical motion
+- visually distinct gem colors
+- attractive rounded mine terrain/surface
+- persistent Sand Tower visible in the background
 
-1. **What is the game?**
-2. **Why is it fun?**
-3. **Who is it for?**
-4. **What does the player do?**
-5. **What is the core gameplay loop?**
-6. **What can the player control?**
-7. **What systems exist?**
-8. **How do those systems communicate?**
-9. **What resources exist?**
-10. **How does progression work?**
-11. **What content exists?**
-12. **What does the game look and sound like?**
-13. **How does the player interact with it?**
-14. **What technical constraints must the game satisfy?**
-15. **What exactly needs to be built, and in what order?**
+The game should prioritize readability and visual satisfaction over excessive detail.
 
-For **StoneWorks specifically**, I would *not* try to write the giant GDD all at once. I'd build it in layers:
+Gem rendering implementation is undecided: one reusable sprite tinted per gem color or separate sprites.
 
-**Vision → Core Loop → Resources → Mining → Physics → Machines → Progression → Economy → UI → Architecture → Content → Technical Requirements → Roadmap**
 
-That would give you a GDD that is actually useful for development rather than a huge document full of ideas that aren't yet decided.
+21. AUDIO
+---------
+
+Audio should reinforce physical and economic feedback.
+
+Important sound categories:
+- explosions
+- rocks falling/impacting
+- machine processing
+- gems moving/sorting
+- selling/reward feedback
+- upgrades
+- prestige
+- UI interaction
+
+Music, ambient audio and the final sound style remain to be defined.
+
+
+22. TUTORIAL / ONBOARDING
+-------------------------
+
+The player should quickly understand:
+1. Workers mine.
+2. Explosions create Stones.
+3. Machines process Stones.
+4. Logistics workers move resources.
+5. Gems go into color-specific storage.
+6. Gems are sold for Money.
+7. Money buys progression.
+
+The exact tutorial presentation is not yet defined.
+
+
+23. STATISTICS
+--------------
+
+Useful statistics may include:
+- total terrain destroyed
+- Stones produced
+- Gems produced by color
+- Sand produced
+- Gems sold
+- Money earned
+- production rate
+- worker count by role
+- machine throughput
+- play time
+- prestige count
+
+Statistics are primarily informational unless explicitly turned into progression mechanics.
+
+
+24. SAVE / LOAD
+--------------
+
+The game requires persistent local saves.
+
+Persistent state should include the gameplay state necessary to continue progression, including:
+- money
+- workers
+- worker assignments
+- upgrades
+- progression/unlocks
+- prestige state
+- stored resources
+- Sand Tower progress
+- relevant world state
+
+Save frequency, backup/corruption handling and multiple save slots remain to be decided.
+
+
+25. ACCESSIBILITY
+-----------------
+
+Minimum goals:
+- readable UI at common Android sizes
+- clear touch targets
+- important information should not depend only on color
+- volume controls
+- sensible effects/screen-shake options if those effects are added
+
+Additional accessibility features can be added based on actual gameplay needs.
+
+
+26. TECHNICAL BOUNDARY
+----------------------
+
+This GDD intentionally does NOT define detailed code architecture.
+
+The authoritative technical documents define:
+- Core vs Simulation
+- World / Mine / WorldGrid ownership
+- logical resources vs physical resource bodies
+- JobSystem vs LogisticsSystem
+- system responsibilities
+- communication rules
+- Godot scene/C# boundaries
+- save architecture
+- manager policy
+
+See TechnicalArchitecture.txt for those decisions.
+
+The GDD should describe desired gameplay behavior; it should not duplicate implementation details.
+
+
+27. CURRENT DESIGN PRINCIPLES
+-----------------------------
+
+1. The simulation should be satisfying to watch even when the player does nothing.
+2. Physical resources should make mining and processing feel tangible.
+3. Player decisions should influence production and progression.
+4. The game should remain understandable despite becoming more complex.
+5. Idle progression should complement, not replace, active interaction.
+6. Visual progression should be persistent and obvious.
+7. Performance on Android is a design constraint, not an afterthought.
+8. New systems should only be added when they create meaningful gameplay.
+9. Unconfirmed ideas should remain explicitly marked as undecided rather than becoming accidental requirements.
+
+
+28. OPEN DESIGN QUESTIONS
+--------------------------
+
+These are the remaining questions that should be answered before the corresponding systems are finalized.
+
+HIGH PRIORITY
+
+1. What is the exact long-term mine structure?
+   - finite mine with reset/new mine?
+   - expanding mine?
+   - multiple mine layers/areas?
+
+2. What exactly does a Stone contain?
+   - one gem?
+   - chance of one of six gems?
+   - multiple gems?
+   - rarity/quality?
+
+3. What is the exact processing chain?
+   - Stone → Grinder → Gem + Sand is the current baseline.
+
+4. What are the meaningful player decisions beyond worker assignment, dynamite and upgrades?
+
+5. What is the final market model and why is saving/selling strategically interesting?
+
+6. What exactly resets at Prestige, and what permanent progression is retained?
+
+7. What is the long-term goal/endgame?
+
+8. What is the final offline progression model?
+
+9. What is the final monetization model?
+
+MEDIUM PRIORITY
+
+10. Are warehouse capacities limited and upgradeable?
+11. Can workers have upgrades/traits, or only increased count?
+12. Does the Sand Tower have gameplay effects or remain visual progression?
+13. Which additional machines, if any, are required for the final game?
+14. What randomness/discovery systems exist besides mining and market fluctuation?
+15. What are the first 5–10 minutes of progression and upgrades?
+16. What is the intended maximum simulation scale on Android?
+17. What are the final audio/music goals?
+18. What is the final tutorial/onboarding flow?
+
+LOW PRIORITY / IMPLEMENTATION-ADJACENT
+
+19. One tinted gem sprite vs separate gem sprites.
+20. Exact responsive layout rules across Android aspect ratios.
+21. Exact save backup/multiple-slot behavior.
+22. Final accessibility options.
+
+
+29. DESIGN STATUS
+-----------------
+
+Confirmed direction:
+- Android portrait idle/incremental mining game
+- six gem colors
+- Stones + Gems + Sand + Money + Dynamite
+- Mining and Logistics worker roles
+- physical stones/gems
+- grid-based mine
+- explosive mining
+- machine processing
+- six color-specific warehouses
+- dynamic gem selling concept
+- worker assignment
+- upgrades
+- prestige concept
+- persistent Sand Tower
+- offline progression
+- optional rewarded ads concept
+
+Still exploratory:
+- exact mine expansion/reset model
+- exact stone/gem generation rules
+- final machine lineup
+- detailed market rotation model
+- detailed prestige rules
+- final offline calculations
+- long-term endgame
+- final monetization
+
+The GDD should be updated when one of these exploratory decisions becomes a real design commitment.
