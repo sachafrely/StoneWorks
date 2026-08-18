@@ -33,6 +33,7 @@ stone-works/
 ├── Assets/
 │   ├── Sprites/
 │   ├── Tilesets/
+│   ├── Backgrounds/
 │   ├── Workers/
 │   ├── Machines/
 │   ├── Resources/
@@ -61,7 +62,7 @@ Scripts/
     C# gameplay code, systems, entities, controllers, and shared infrastructure. Scripts are grouped by responsibility/domain.
 
 Assets/
-    Visual assets such as sprites, tilesets, machine art, worker art, resource art, and UI art.
+    Visual assets such as sprites, tilesets, background layers, machine art, worker art, resource art, and UI art.
 
 Data/
     Static/configurable game definitions such as resources, machines, upgrades, and markets.
@@ -153,6 +154,8 @@ Scripts/
     ├── UpgradeUI.cs
     └── PrestigeUI.cs
 
+No dedicated ParallaxBackground.cs is planned initially. The parallax background is presentation/scene composition and should use Godot's parallax/camera functionality rather than introducing gameplay code for it. A dedicated script should only be added later if the background develops real runtime behavior that cannot be handled by scene configuration.
+
 Only create a planned script when its functionality is actually needed. The planned list is an architectural map, not a requirement to create every file immediately.
 
 There is intentionally no ResourceManager, WorkerManager, or MachineManager in the baseline map. A manager may be added later if a concrete lifecycle, ownership, or lookup requirement justifies it.
@@ -186,6 +189,25 @@ Scenes/
 
 The current project uses Scenes/main.tscn. Do not create an unnecessary Main/ subfolder unless the project later needs multiple main-scene files.
 
+The main world presentation should contain a parallax background layer behind gameplay. This can be composed directly in main.tscn or the appropriate World scene using Godot's parallax nodes/camera setup.
+
+Planned visual layering:
+
+Camera
+└── Parallax background
+    ├── Far background / sky
+    ├── Mid-distance environment
+    └── Near background elements
+        ↓
+    Gameplay world
+    ├── Terrain
+    ├── Workers
+    ├── Machines
+    ├── Resources
+    └── Sand Tower
+
+The exact number, artwork and movement strength of the background layers are still to be decided.
+
 
 5. Naming and organization rules
 ---------------------------------
@@ -195,6 +217,8 @@ The current project uses Scenes/main.tscn. Do not create an unnecessary Main/ su
 - Keep logical resource data separate from physical resource simulation.
 - Keep gameplay data separate from visual assets.
 - Keep UI presentation separate from gameplay rules.
+- Keep background artwork in Assets/Backgrounds/.
+- Keep parallax scene composition in the relevant Godot scene rather than creating a script without a concrete runtime responsibility.
 - Avoid creating folders only for theoretical future files when an existing folder already represents the correct domain.
 - When a new system is introduced, update this document and TechnicalArchitecture.txt together.
 - Do not move a script merely to match a planned list; classify it by its actual responsibility.
@@ -217,5 +241,6 @@ Use this document for questions such as:
 - Which Godot folder should contain this file?
 - Where should a new C# system be placed?
 - Where should a scene, asset, or data definition live?
+- Where should parallax background artwork and scene composition live?
 
 The two documents should remain synchronized when the architecture or physical organization changes.
