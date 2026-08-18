@@ -130,12 +130,21 @@ World
 
 Machines, workers, warehouse, and other world entities exist in the World but remain owned by their appropriate systems/entities.
 
+ParallaxBackgroundController and ParallaxLayerController are presentation infrastructure attached to the world presentation. They do not participate in gameplay state, simulation rules, resource ownership, or physics ownership.
 
-4. Resources: logical data vs physical representation
-------------------------------------------------------
 
-Do not create a mandatory central ResourceManager merely to make resources globally accessible.
-For the current game design, it would become a god-object risk.
+4. Resource Manager and resource ownership
+-------------------------------------------
+
+ResourceManager is one of the three intentional managers in the baseline architecture.
+
+ResourceManager owns:
+- runtime resource lifecycle
+- creation and removal of logical resources
+- resource registration and lookup
+- resource totals
+- transfers between logical owners/stores
+- coordination between logical resources and physical representations when required
 
 ResourceData
 - static definition/configuration of a resource type
@@ -159,11 +168,11 @@ ResourcePhysics / PhysicsBody
 PhysicsWorld
 - owns physical simulation and collision resolution
 
-The logical resource and physical body must remain separable:
+The logical resource and physical body remain separable:
 
 Resource created
     ↓
-logical Resource
+ResourceManager owns logical lifecycle
     ↓
 physical representation created when required
     ↓
@@ -173,13 +182,11 @@ resource can later be picked up/stored
     ↓
 physical representation can be removed while logical ownership continues
 
-This allows the game to avoid unnecessary physics objects for resources that are already stored and leaves room for a future optimized resource-physics implementation.
-
-A central ResourceManager may be introduced later only if a concrete ownership/lookup requirement appears. It is not part of the baseline architecture.
+ResourceManager must not become a god object. It does not own market prices, worker behavior, machine recipes, or physics internals.
 
 
 5. Physics
----------
+----------
 
 PhysicsWorld owns:
 - gravity
@@ -193,7 +200,7 @@ ResourcePhysics translates logical resources that need physical simulation into 
 
 The first implementation may use Godot physics where appropriate. The architecture must not assume that every resource permanently requires a full rigid-body node; performance-oriented implementations can be introduced later behind the same responsibility boundary.
 
-Mining and machines may request creation of physical resources, but they do not directly manipulate collision internals.
+Mining and machines may request creation of physical resources through the resource/physics APIs, but they do not directly manipulate collision internals.
 
 
 6. Mining
@@ -218,7 +225,7 @@ MiningSystem validates/performs mining
       ↓
 Mine changes WorldGrid
       ↓
-Resources are created
+ResourceManager creates logical resources
       ↓
 Resource/Physics systems handle resulting physical resources
       ↓
@@ -263,10 +270,23 @@ WorkerMovement / WorkerInventory
 JobSystem is the generic job mechanism. LogisticsSystem is a domain system that uses it. They are not duplicates.
 
 
-8. Workers
-----------
+8. Workers and WorkerManager
+----------------------------
 
 Worker is the world entity/state for an individual worker.
+
+WorkerManager is one of the three intentional managers in the baseline architecture.
+It owns the collection and lifecycle of workers.
+
+WorkerManager responsibilities:
+- create/unlock workers
+- register/remove workers
+- assign worker roles
+- find workers by ID or availability
+- expose worker summaries/counts
+- enforce worker lifecycle/collection rules
+
+WorkerManager does not implement worker AI, movement, inventory, or job-selection rules.
 
 WorkerAI
 - chooses/accepts work and decides the worker's next action
@@ -282,16 +302,24 @@ WorkerInventory
 WorkerJob
 - current job reference/state from the worker's perspective
 
-WorkerManager should only exist if a concrete collection/lifecycle ownership need appears. Do not create manager classes merely because they are common in other projects.
-
 Workers should request/perform actions through system APIs rather than directly modifying unrelated systems.
 
 
-9. Machines
------------
+9. Machines and MachineManager
+------------------------------
 
 Machine represents a machine entity and its local state.
-MachineManager is only justified if centralized machine lifecycle/lookup is required.
+
+MachineManager is one of the three intentional managers in the baseline architecture.
+It owns the collection and lifecycle of machines placed in the world.
+
+MachineManager responsibilities:
+- register/create/remove machines
+- find machines by ID, type, or location
+- coordinate machine-wide lifecycle/update operations
+- provide controlled machine lookup
+
+MachineManager does not implement individual processing recipes or market behavior.
 
 ProcessingMachine owns machine-specific processing state/rules.
 MachineRecipe defines configurable input/output/timing data.
@@ -302,7 +330,7 @@ Example:
 
 Machine processing completes
       ↓
-logical Gem created
+ResourceManager creates logical Gem
       ↓
 physical Gem created if it should enter the world physically
       ↓
@@ -343,8 +371,8 @@ Systems expose the state required for saving through explicit save interfaces or
 SaveSystem should not manipulate gameplay internals directly.
 
 
-13. Godot scenes and C# systems
--------------------------------
+13. Godot scenes, systems, and scripted presentation
+-----------------------------------------------------
 
 Scenes are composition and presentation boundaries, not the architecture's gameplay authority.
 
@@ -367,6 +395,26 @@ Rules:
 - Avoid global singletons unless a service genuinely must be globally accessible and has a clear lifecycle.
 
 For physical entities such as workers, machines and physical resources, the Godot node can be the visual/physics representation while logical gameplay state remains owned by the appropriate entity/system.
+
+Scripted parallax is a presentation feature:
+
+Camera2D
+    ↓
+ParallaxBackgroundController
+    ↓
+ParallaxLayerController × N
+    ↓
+background visual nodes
+
+ParallaxBackgroundController tracks the active camera and coordinates its registered layers.
+ParallaxLayerController applies a configurable depth factor and optional wrapping to one layer.
+
+The parallax controllers must not:
+- own gameplay state
+- modify terrain/resource/worker/machine state
+- participate in physics rules
+- become managers for world entities
+- depend on gameplay systems merely to move background art
 
 
 14. Communication rules
@@ -403,8 +451,37 @@ Examples of useful events:
 - PrestigePerformed
 
 
-15. System size and manager policy
-----------------------------------
+15. Three-manager policy
+------------------------
+
+StoneWorks intentionally has three managers:
+
+ResourceManager
+- owns logical resource lifecycle and resource lookup/transfer responsibilities.
+
+WorkerManager
+- owns worker collection and lifecycle/role-management responsibilities.
+
+MachineManager
+- owns machine collection and lifecycle/lookup responsibilities.
+
+These managers exist because the game has meaningful centralized lifecycle and lookup requirements for these three entity domains.
+
+They are not generic utility classes and must not absorb unrelated gameplay rules.
+
+Domain systems remain responsible for domain rules:
+- MiningSystem owns mining rules.
+- LogisticsSystem owns logistics rules.
+- EconomySystem owns economy rules.
+- ProcessingMachine owns machine processing rules.
+- WorkerAI owns worker decision-making.
+- PhysicsWorld owns physical simulation.
+
+Avoid adding additional managers merely because the name "Manager" is convenient. New managers require a similarly concrete ownership/lifecycle justification.
+
+
+16. System size and boundaries
+-----------------------------
 
 Start smaller than the final design.
 A planned system/file is not automatically required.
@@ -416,18 +493,17 @@ Create a separate system when at least one of these is true:
 - keeping it in another class would create a clear responsibility violation
 
 Avoid:
-- empty manager classes
+- generic god objects
+- manager classes containing unrelated gameplay rules
 - one-class wrappers with no ownership value
 - global registries without a concrete need
 - giant systems containing several unrelated domains
 
-It is acceptable for an early implementation to have fewer classes than the planned architecture. Split classes when real complexity appears, not in anticipation of it.
+It is acceptable for an early implementation to have fewer classes than the planned architecture. Split classes when real complexity appears, while keeping the three intentional managers as the baseline ownership infrastructure.
 
 
-16. Initial script map
+17. Initial script map
 ----------------------
-
-The intended baseline is:
 
 Core/
 - Game.cs
@@ -440,6 +516,8 @@ World/
 - WorldGrid.cs
 - Terrain.cs
 - Mine.cs
+- ParallaxBackgroundController.cs
+- ParallaxLayerController.cs
 
 Workers/
 - Worker.cs
@@ -447,12 +525,14 @@ Workers/
 - WorkerJob.cs
 - WorkerMovement.cs
 - WorkerInventory.cs
+- WorkerManager.cs
 
 Resources/
 - Resource.cs
 - ResourceData.cs
 - ResourceType.cs
 - ResourceStack.cs
+- ResourceManager.cs
 
 Physics/
 - PhysicsWorld.cs
@@ -474,6 +554,7 @@ Machines/
 - Machine.cs
 - ProcessingMachine.cs
 - MachineRecipe.cs
+- MachineManager.cs
 
 Economy/
 - EconomySystem.cs
@@ -502,17 +583,18 @@ UI/
 - UpgradeUI.cs
 - PrestigeUI.cs
 
-This is a target map, not a creation checklist. A script should be added only when its responsibility is needed.
+This is a target map, not a creation checklist. A script should be added only when its responsibility is needed. The three managers and scripted parallax controllers are now intentional parts of the planned infrastructure.
 
 
-17. Architectural decision summary
+18. Architectural decision summary
 -----------------------------------
 
 1. Core = application infrastructure/state; Simulation = advancing gameplay.
-2. No baseline ResourceManager; resources are owned through their actual domain/state holders.
+2. ResourceManager, WorkerManager, and MachineManager are the three intentional baseline managers.
 3. World owns the world; Mine owns mine terrain state; WorldGrid stores grid data; Terrain renders it.
-4. Logical Resource and physical ResourcePhysicsBody are separate responsibilities.
+4. Logical Resource and physical ResourcePhysicsBody are separate responsibilities, with ResourceManager owning logical resource lifecycle.
 5. JobSystem manages generic jobs; LogisticsSystem owns transport/logistics rules and creates logistics jobs.
 6. Godot scenes represent/combine things; C# systems own gameplay rules; communication uses APIs, queries and events.
-7. Managers are optional and must earn their existence through a real ownership/lifecycle need.
-8. Start with the smallest useful implementation and split systems only when complexity justifies it.
+7. Scripted parallax is presentation infrastructure controlled by ParallaxBackgroundController and ParallaxLayerController; it does not own gameplay state.
+8. Managers remain focused on lifecycle/collection/lookup responsibilities and do not become general gameplay containers.
+9. Start with the smallest useful implementation and split systems only when complexity justifies it.
