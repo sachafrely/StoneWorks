@@ -1,129 +1,35 @@
 StoneWorks — Godot Project Structure
 
-This document defines the planned physical structure of the Godot project.
+Purpose
+-------
+This document defines where project files belong in the Godot project.
 
-The structure is based on TechnicalArchitecture.txt. The architecture document defines responsibilities and communication; this document maps those responsibilities to Godot folders and files.
+TechnicalArchitecture.txt is authoritative for system responsibilities, ownership, communication, and interactions. This document is authoritative for physical Godot folder organization and planned file locations.
 
-This is a PLANNED structure. Do not create every listed script immediately. Add files when their system is actually needed.
-
-The main rule is:
-
-    Scenes = Godot scene structure and visual entities
-    Scripts = gameplay systems, entities, and controllers
-    Assets = visual/audio assets
-    Data = configuration and definitions
-    Saves = runtime save data
+This is a planned structure. Empty folders and planned scripts do not mean the corresponding functionality has been implemented.
 
 
-StoneWorks/
-│
+1. Current project structure
+----------------------------
+
+stone-works/
 ├── project.godot
-│
 ├── Scenes/
-│   ├── Main/
-│   │   └── Main.tscn
-│   │
-│   ├── World/
-│   │   ├── World.tscn
-│   │   ├── Mine.tscn
-│   │   └── Warehouse.tscn
-│   │
-│   ├── Workers/
-│   │   └── Worker.tscn
-│   │
-│   ├── Machines/
-│   │   ├── ProcessingMachine.tscn
-│   │   └── ...
-│   │
-│   ├── Resources/
-│   │   ├── Stone.tscn
-│   │   └── Gem.tscn
-│   │
-│   └── UI/
-│       ├── MainUI.tscn
-│       ├── WorkerUI.tscn
-│       ├── MarketUI.tscn
-│       ├── UpgradeUI.tscn
-│       └── PrestigeUI.tscn
-│
+│   └── main.tscn
 ├── Scripts/
-│   │
 │   ├── Core/
-│   │   ├── Game.cs
-│   │   ├── GameState.cs
-│   │   ├── GameTime.cs
-│   │   └── EventBus.cs
-│   │
-│   ├── World/
-│   │   ├── World.cs
-│   │   ├── WorldGrid.cs
-│   │   ├── Terrain.cs
-│   │   └── Mine.cs
-│   │
-│   ├── Workers/
-│   │   ├── Worker.cs
-│   │   ├── WorkerManager.cs
-│   │   ├── WorkerAI.cs
-│   │   ├── WorkerJob.cs
-│   │   ├── WorkerMovement.cs
-│   │   └── WorkerInventory.cs
-│   │
-│   ├── Resources/
-│   │   ├── Resource.cs
-│   │   ├── ResourceData.cs
-│   │   ├── ResourceType.cs
-│   │   ├── ResourceStack.cs
-│   │   └── ResourceManager.cs
-│   │
-│   ├── Physics/
-│   │   ├── PhysicsWorld.cs
-│   │   ├── ResourcePhysics.cs
-│   │   └── PhysicsBody.cs
-│   │
-│   ├── Mining/
-│   │   ├── MiningSystem.cs
-│   │   ├── MiningJob.cs
-│   │   └── Dynamite.cs
-│   │
-│   ├── Logistics/
-│   │   ├── LogisticsSystem.cs
-│   │   ├── JobSystem.cs
-│   │   ├── TransportJob.cs
-│   │   └── Storage.cs
-│   │
-│   ├── Machines/
-│   │   ├── Machine.cs
-│   │   ├── MachineManager.cs
-│   │   ├── ProcessingMachine.cs
-│   │   └── MachineRecipe.cs
-│   │
 │   ├── Economy/
-│   │   ├── EconomySystem.cs
-│   │   ├── Market.cs
-│   │   ├── GemMarket.cs
-│   │   └── SellingSystem.cs
-│   │
+│   ├── Logistics/
+│   ├── Machines/
+│   ├── Mining/
+│   ├── Physics/
 │   ├── Progression/
-│   │   ├── UpgradeSystem.cs
-│   │   ├── UnlockSystem.cs
-│   │   └── PrestigeSystem.cs
-│   │
-│   ├── Simulation/
-│   │   ├── SimulationSystem.cs
-│   │   ├── SimulationTick.cs
-│   │   └── StatisticsSystem.cs
-│   │
+│   ├── Resources/
 │   ├── Save/
-│   │   ├── SaveSystem.cs
-│   │   └── SaveData.cs
-│   │
-│   └── UI/
-│       ├── MainUI.cs
-│       ├── WorkerUI.cs
-│       ├── MarketUI.cs
-│       ├── UpgradeUI.cs
-│       └── PrestigeUI.cs
-│
+│   ├── Simulation/
+│   ├── UI/
+│   ├── Workers/
+│   └── World/
 ├── Assets/
 │   ├── Sprites/
 │   ├── Tilesets/
@@ -131,576 +37,182 @@ StoneWorks/
 │   ├── Machines/
 │   ├── Resources/
 │   └── UI/
-│
 ├── Data/
 │   ├── Resources/
 │   ├── Machines/
 │   ├── Upgrades/
 │   └── Markets/
-│
 ├── Audio/
 │   ├── Music/
 │   └── SFX/
+├── Saves/
+└── Docs/
+
+The repository may contain additional Godot/project files such as .godot metadata and configuration files; they are not part of the gameplay organization described here.
+
+
+2. Folder responsibilities
+---------------------------
+
+Scenes/
+    Godot scene composition. Scenes represent visual/physical entities and their node structure. Core gameplay rules belong in systems, not scenes.
+
+Scripts/
+    C# gameplay code, systems, entities, controllers, and shared infrastructure. Scripts are grouped by responsibility/domain.
+
+Assets/
+    Visual assets such as sprites, tilesets, machine art, worker art, resource art, and UI art.
+
+Data/
+    Static/configurable game definitions such as resources, machines, upgrades, and markets.
+
+Audio/
+    Music and sound effects.
+
+Saves/
+    Save-related runtime data or save-file support. Do not put gameplay rules here.
+
+Docs/
+    Project documentation. TechnicalArchitecture.txt defines architecture; this document defines physical organization.
+
+
+3. Planned script structure
+---------------------------
+
+Scripts/
+├── Core/
+│   ├── Game.cs
+│   ├── GameState.cs
+│   ├── GameTime.cs
+│   └── EventBus.cs
 │
-└── Saves/
-
-
-# Folder responsibilities
-
-## Scenes/
-
-Contains Godot scenes that represent the visual/physical composition of the game.
-
-Scenes should not become the place where core gameplay rules are implemented.
-
-Examples:
-
-    Worker.tscn
-    Stone.tscn
-    Gem.tscn
-    ProcessingMachine.tscn
-
-The scene represents the entity. The corresponding C# code and systems define its behavior.
-
-
-## Scripts/Core/
-
-Application-level coordination and shared infrastructure.
-
-Game.cs
-    Central coordinator. Initializes systems, loads the game, and starts the simulation. It should not contain mining, economy, worker, or machine gameplay logic.
-
-GameState.cs
-    Represents the current persistent/runtime game state.
-
-GameTime.cs
-    Owns game-time concepts such as delta time, simulation speed, pause state, and offline time handling.
-
-EventBus.cs
-    Provides event-based communication between systems where appropriate.
-
-
-## Scripts/World/
-
-Owns the game environment and grid-based terrain representation.
-
-World.cs
-    Represents the overall game world.
-
-WorldGrid.cs
-    Owns gameplay grid data such as empty, occupied, destroyed, and terrain/resource cells.
-
-Terrain.cs
-    Represents terrain rules/data and its relationship with the world grid.
-
-Mine.cs
-    Represents the mine as a world entity.
-
-The world grid is gameplay data. Visual tiles are only a representation of that data.
-
-
-## Scripts/Workers/
-
-Contains worker entities and worker-specific behavior.
-
-Worker.cs
-    Represents a worker entity.
-
-WorkerManager.cs
-    Manages the collection/lifecycle of workers.
-
-WorkerAI.cs
-    Decides what the worker should currently do based on available jobs and worker state.
-
-WorkerJob.cs
-    Represents the worker's currently assigned job/state.
-
-WorkerMovement.cs
-    Handles worker movement, including the future grid/terrain-based climbing approach.
-
-WorkerInventory.cs
-    Handles the worker's temporary carried resources.
-
-Workers should remain relatively dumb. Mining, logistics, economy, and machine rules belong to their respective systems.
-
-
-## Scripts/Mining/
-
-Owns mining gameplay.
-
-MiningSystem.cs
-    Coordinates mining rules and mining jobs.
-
-MiningJob.cs
-    Represents a mining task assigned to a worker.
-
-Dynamite.cs
-    Represents/controls dynamite as a mining action or gameplay entity.
-
-MiningSystem creates the result of mining. It does not own the resulting resource's physics.
-
-
-## Scripts/Resources/
-
-Owns the logical representation of resources.
-
-Resource.cs
-    Represents a logical resource instance.
-
-ResourceData.cs
-    Defines resource properties/configuration where appropriate.
-
-ResourceType.cs
-    Defines resource categories/types.
-
-ResourceStack.cs
-    Represents quantities of resources in inventories/storage.
-
-ResourceManager.cs
-    Coordinates resource creation, registration, and resource-related state.
-
-A logical resource is separate from its physical representation.
-
-
-## Scripts/Physics/
-
-Owns physical simulation of resources and other relevant physical objects.
-
-PhysicsWorld.cs
-    Owns gravity, collision detection/resolution, ground collision, resource/resource collision, sleeping/resting behavior, and physics updates.
-
-ResourcePhysics.cs
-    Connects logical resources to their physical representation.
-
-PhysicsBody.cs
-    Represents the physics abstraction used by the resource physics system.
-
-The architecture should allow the physics implementation to be optimized later for Android without changing gameplay rules.
-
-
-## Scripts/Logistics/
-
-Owns transportation, storage, and logistics jobs.
-
-LogisticsSystem.cs
-    Coordinates pickup, delivery, machine supply, warehouse, and sorting logistics.
-
-JobSystem.cs
-    Creates and manages available jobs.
-
-TransportJob.cs
-    Represents a resource transportation task.
-
-Storage.cs
-    Represents storage/inventory behavior for warehouses and other storage locations.
-
-The job system decides what work is available. WorkerAI decides which suitable job a worker should take.
-
-
-## Scripts/Machines/
-
-Owns machine entities and processing rules.
-
-Machine.cs
-    Base machine representation.
-
-MachineManager.cs
-    Manages machine instances/lifecycle.
-
-ProcessingMachine.cs
-    Implements processing behavior for machines that transform inputs into outputs.
-
-MachineRecipe.cs
-    Defines processing inputs, outputs, and processing requirements.
-
-Machines transform inputs into outputs. They should not directly control UI, economy, or the physical movement of their outputs.
-
-
-## Scripts/Economy/
-
-Owns money, selling, and market rules.
-
-EconomySystem.cs
-    Coordinates economy state and rules.
-
-Market.cs
-    General market behavior.
-
-GemMarket.cs
-    Gem-specific market prices and fluctuations.
-
-SellingSystem.cs
-    Handles selling resources through the economy/market.
-
-The economy does not need to know how workers operate.
-
-
-## Scripts/Progression/
-
-Owns upgrades, unlocks, and prestige.
-
-UpgradeSystem.cs
-    Applies upgrade rules.
-
-UnlockSystem.cs
-    Determines what content becomes available.
-
-PrestigeSystem.cs
-    Calculates prestige rewards, resets temporary progression, and preserves permanent progression.
-
-
-## Scripts/Simulation/
-
-Coordinates the passage of game time and system updates.
-
-SimulationSystem.cs
-    Coordinates simulation updates without placing every gameplay rule in one class.
-
-SimulationTick.cs
-    Represents a simulation update/tick where useful.
-
-StatisticsSystem.cs
-    Tracks gameplay statistics.
-
-Not every system needs to update every frame. Physics and movement may update every physics tick, while machines, markets, statistics, and idle calculations can update on appropriate intervals/events.
-
-
-## Scripts/Save/
-
-Owns persistence.
-
-SaveSystem.cs
-    Handles saving/loading.
-
-SaveData.cs
-    Defines the serialized game data.
-
-
-## Scripts/UI/
-
-Contains UI controllers/presentation logic.
-
-UI should display state and send player commands. It should not directly manipulate gameplay internals.
-
-For example:
-
-    UI → "Assign worker to Mining"
-
-rather than:
-
-    UI → modify ten Worker fields directly
-
-
-# Communication rules
-
-The following rules are part of the architecture and should be respected when adding new scripts.
-
-1. Rendering/UI does not own gameplay.
-2. Worker does not directly control Economy.
-3. Machine does not directly manipulate UI.
-4. UI does not directly modify worker internals.
-5. Mining does not directly manipulate physics internals.
-6. Market does not need to know how workers operate.
-7. Systems communicate through clear interfaces/events where practical.
-8. Entities represent things; systems own gameplay rules and data.
-9. A system should have one clear responsibility.
-10. Do not create a script merely because it appears in this document. Create it when the corresponding functionality is needed.
-
-
-# Important architecture flow
-
-Mining:
-
-    WorkerAI
-        ↓
-    JobSystem
-        ↓
-    MiningJob
-        ↓
-    MiningSystem
-        ↓
-    Terrain destroyed
-        ↓
-    Resources created
-        ↓
-    ResourceManager
-        ↓
-    PhysicsWorld
-
-Machine processing:
-
-    Machine
-        ↓
-    Processing complete
-        ↓
-    Resource created
-        ↓
-    EventBus / ResourceManager
-        ↓
-    PhysicsWorld
-        ↓
-    Physical resource falls and settles
-
-Logistics:
-
-    LogisticsSystem / JobSystem
-        ↓
-    TransportJob
-        ↓
-    WorkerAI
-        ↓
-    WorkerMovement
-        ↓
-    WorkerInventory
-        ↓
-    Storage / Warehouse
-
-Selling:
-
-    Player / AutoSell
-        ↓
-    SellingSystem
-        ↓
-    Market
-        ↓
-    Money added
-        ↓
-    EventBus
-        ├── StatisticsSystem
-        └── UI
-
-
-# Future / optional systems
-
-Online functionality such as leaderboards is NOT part of the current core architecture.
-
-If online functionality is added later, it should be introduced as a separate optional system rather than being treated as a required part of the base game.
-
-
-# Relationship with TechnicalArchitecture.txt
-
-TechnicalArchitecture.txt is the authority for:
-
-* system responsibilities
-* architectural rules
-* communication rules
-* ownership boundaries
-* system interactions
-
-This document is the authority for:
-
-* Godot folder organization
-* scene organization
-* planned script locations
-* asset/data organization
-
-The two documents should describe the same architecture. If a system is added or renamed in TechnicalArchitecture.txt, this structure should be updated at the same time.
-
-StoneWorks — Godot Project Structure
-
-This document defines the planned physical structure of the Godot project. It is synchronized with TechnicalArchitecture.txt.
-
-This is a PLANNED structure. Do not implement every listed script immediately. Create each script when its functionality is needed.
-
-Scripts/Core/        Game.cs, GameState.cs, GameTime.cs, EventBus.cs
-Scripts/World/       World.cs, WorldGrid.cs, Terrain.cs, Mine.cs
-Scripts/Workers/     Worker.cs, WorkerManager.cs, WorkerAI.cs, WorkerJob.cs, WorkerMovement.cs, WorkerInventory.cs
-Scripts/Resources/   Resource.cs, ResourceData.cs, ResourceType.cs, ResourceStack.cs, ResourceManager.cs
-Scripts/Physics/     PhysicsWorld.cs, ResourcePhysics.cs, PhysicsBody.cs
-Scripts/Mining/      MiningSystem.cs, MiningJob.cs, Dynamite.cs
-Scripts/Logistics/   LogisticsSystem.cs, JobSystem.cs, TransportJob.cs, Storage.cs
-Scripts/Machines/    Machine.cs, MachineManager.cs, ProcessingMachine.cs, MachineRecipe.cs
-Scripts/Economy/     EconomySystem.cs, Market.cs, GemMarket.cs, SellingSystem.cs
-Scripts/Progression/ UpgradeSystem.cs, UnlockSystem.cs, PrestigeSystem.cs
-Scripts/Simulation/  SimulationSystem.cs, SimulationTick.cs, StatisticsSystem.cs
-Scripts/Save/        SaveSystem.cs, SaveData.cs
-Scripts/UI/          MainUI.cs, WorkerUI.cs, MarketUI.cs, UpgradeUI.cs, PrestigeUI.cs
-
-Assets/
-├── Sprites/
-├── Tilesets/
+├── World/
+│   ├── World.cs
+│   ├── WorldGrid.cs
+│   ├── Terrain.cs
+│   └── Mine.cs
+│
 ├── Workers/
-├── Machines/
+│   ├── Worker.cs
+│   ├── WorkerManager.cs
+│   ├── WorkerAI.cs
+│   ├── WorkerJob.cs
+│   ├── WorkerMovement.cs
+│   └── WorkerInventory.cs
+│
 ├── Resources/
+│   ├── Resource.cs
+│   ├── ResourceData.cs
+│   ├── ResourceType.cs
+│   ├── ResourceStack.cs
+│   └── ResourceManager.cs
+│
+├── Physics/
+│   ├── PhysicsWorld.cs
+│   ├── ResourcePhysics.cs
+│   └── PhysicsBody.cs
+│
+├── Mining/
+│   ├── MiningSystem.cs
+│   ├── MiningJob.cs
+│   └── Dynamite.cs
+│
+├── Logistics/
+│   ├── LogisticsSystem.cs
+│   ├── JobSystem.cs
+│   ├── TransportJob.cs
+│   └── Storage.cs
+│
+├── Machines/
+│   ├── Machine.cs
+│   ├── MachineManager.cs
+│   ├── ProcessingMachine.cs
+│   └── MachineRecipe.cs
+│
+├── Economy/
+│   ├── EconomySystem.cs
+│   ├── Market.cs
+│   ├── GemMarket.cs
+│   └── SellingSystem.cs
+│
+├── Progression/
+│   ├── UpgradeSystem.cs
+│   ├── UnlockSystem.cs
+│   └── PrestigeSystem.cs
+│
+├── Simulation/
+│   ├── SimulationSystem.cs
+│   ├── SimulationTick.cs
+│   └── StatisticsSystem.cs
+│
+├── Save/
+│   ├── SaveSystem.cs
+│   └── SaveData.cs
+│
 └── UI/
+    ├── MainUI.cs
+    ├── WorkerUI.cs
+    ├── MarketUI.cs
+    ├── UpgradeUI.cs
+    └── PrestigeUI.cs
 
-Data/
-├── Resources/
-├── Machines/
-├── Upgrades/
-└── Markets/
-
-Audio/
-├── Music/
-└── SFX/
-
-Saves/
-
-# Architecture rules
-
-Scenes contain Godot scene composition and visual/physical entities. They should not own core gameplay rules.
-
-Core coordinates the application. Game should not contain gameplay logic. GameState represents current game state. GameTime owns game-time concepts. EventBus provides event-based communication.
-
-World owns the environment and grid-based terrain representation. The grid is gameplay data; visual tiles are only its representation.
-
-Workers contain worker entities and worker-specific behavior. Workers remain relatively dumb; mining, logistics, economy, and machine rules belong to their systems.
-
-Mining owns mining gameplay but does not own resource physics.
-
-Resources own logical resource representation. Logical resources are separate from physical representations.
-
-Physics owns physical simulation and collisions and should remain replaceable/optimizable for Android.
-
-Logistics owns transportation, storage, and jobs. JobSystem creates/manages jobs; WorkerAI selects suitable jobs.
-
-Machines transform inputs into outputs and do not directly control UI, economy, or output physics.
-
-Economy owns money, selling, and market rules.
-
-Progression owns upgrades, unlocks, and prestige.
-
-Simulation coordinates game-time progression. Not every system needs to update every frame.
-
-Save owns persistence.
-
-UI displays state and sends player commands; it should not directly manipulate gameplay internals.
-
-# Communication rules
-
-1. Rendering/UI does not own gameplay.
-2. Worker does not directly control Economy.
-3. Machine does not directly manipulate UI.
-4. UI does not directly modify worker internals.
-5. Mining does not directly manipulate physics internals.
-6. Market does not need to know how workers operate.
-7. Systems communicate through clear interfaces/events where practical.
-8. Entities represent things; systems own gameplay rules and data.
-9. A system should have one clear responsibility.
-10. Do not create planned scripts merely because they appear in this document.
-
-# Main flows
-
-Mining: WorkerAI → JobSystem → MiningJob → MiningSystem → Terrain destroyed → Resources created → ResourceManager → PhysicsWorld
-
-Machine processing: Machine → Processing complete → Resource created → EventBus / ResourceManager → PhysicsWorld
-
-Logistics: LogisticsSystem / JobSystem → TransportJob → WorkerAI → WorkerMovement → WorkerInventory → Storage
-
-Selling: Player / AutoSell → SellingSystem → Market → Money → EventBus → StatisticsSystem / UI
-
-# Optional / future
-
-Online functionality such as leaderboards is not part of the core architecture. If added later, it should be a separate optional system.
-
-# Document authority
-
-TechnicalArchitecture.txt is authoritative for system responsibilities, architectural rules, communication, ownership boundaries, and interactions.
-
-GodotProjectStructure.txt is authoritative for Godot folder organization, scene organization, planned script locations, and asset/data organization.
+Only create a planned script when its functionality is actually needed.
 
 
+4. Planned scene organization
+-----------------------------
 
-
-StoneWorks — Godot Project Structure
-
-This document defines the planned physical structure of the Godot project. It is synchronized with TechnicalArchitecture.txt.
-
-This is a PLANNED structure. Do not implement every listed script immediately. Create each script when its functionality is needed.
-
-Scripts/Core/        Game.cs, GameState.cs, GameTime.cs, EventBus.cs
-Scripts/World/       World.cs, WorldGrid.cs, Terrain.cs, Mine.cs
-Scripts/Workers/     Worker.cs, WorkerManager.cs, WorkerAI.cs, WorkerJob.cs, WorkerMovement.cs, WorkerInventory.cs
-Scripts/Resources/   Resource.cs, ResourceData.cs, ResourceType.cs, ResourceStack.cs, ResourceManager.cs
-Scripts/Physics/     PhysicsWorld.cs, ResourcePhysics.cs, PhysicsBody.cs
-Scripts/Mining/      MiningSystem.cs, MiningJob.cs, Dynamite.cs
-Scripts/Logistics/   LogisticsSystem.cs, JobSystem.cs, TransportJob.cs, Storage.cs
-Scripts/Machines/    Machine.cs, MachineManager.cs, ProcessingMachine.cs, MachineRecipe.cs
-Scripts/Economy/     EconomySystem.cs, Market.cs, GemMarket.cs, SellingSystem.cs
-Scripts/Progression/ UpgradeSystem.cs, UnlockSystem.cs, PrestigeSystem.cs
-Scripts/Simulation/  SimulationSystem.cs, SimulationTick.cs, StatisticsSystem.cs
-Scripts/Save/        SaveSystem.cs, SaveData.cs
-Scripts/UI/          MainUI.cs, WorkerUI.cs, MarketUI.cs, UpgradeUI.cs, PrestigeUI.cs
-
-Assets/
-├── Sprites/
-├── Tilesets/
+Scenes/
+├── main.tscn
+├── World/
+│   ├── World.tscn
+│   ├── Mine.tscn
+│   └── Warehouse.tscn
 ├── Workers/
+│   └── Worker.tscn
 ├── Machines/
+│   ├── ProcessingMachine.tscn
+│   └── ...
 ├── Resources/
+│   ├── Stone.tscn
+│   └── Gem.tscn
 └── UI/
+    ├── MainUI.tscn
+    ├── WorkerUI.tscn
+    ├── MarketUI.tscn
+    ├── UpgradeUI.tscn
+    └── PrestigeUI.tscn
 
-Data/
-├── Resources/
-├── Machines/
-├── Upgrades/
-└── Markets/
+The current project uses Scenes/main.tscn. Do not create an unnecessary Main/ subfolder unless the project later needs multiple main-scene files.
 
-Audio/
-├── Music/
-└── SFX/
 
-Saves/
+5. Naming and organization rules
+---------------------------------
 
-# Architecture rules
+- Use PascalCase for C# script and scene names, except the existing project entry scene main.tscn.
+- Keep scripts grouped by the system/domain they primarily belong to.
+- Keep logical resource data separate from physical resource simulation.
+- Keep gameplay data separate from visual assets.
+- Keep UI presentation separate from gameplay rules.
+- Avoid creating folders only for theoretical future files when an existing folder already represents the correct domain.
+- When a new system is introduced, update this document and TechnicalArchitecture.txt together.
+- Do not move a script merely to match a planned list; classify it by its actual responsibility.
 
-Scenes contain Godot scene composition and visual/physical entities. They should not own core gameplay rules.
 
-Core coordinates the application. Game should not contain gameplay logic. GameState represents current game state. GameTime owns game-time concepts. EventBus provides event-based communication.
+6. Architecture boundary
+-------------------------
 
-World owns the environment and grid-based terrain representation. The grid is gameplay data; visual tiles are only its representation.
+This document deliberately does not repeat the detailed architecture rules and communication flows from TechnicalArchitecture.txt.
 
-Workers contain worker entities and worker-specific behavior. Workers remain relatively dumb; mining, logistics, economy, and machine rules belong to their systems.
+Use TechnicalArchitecture.txt for questions such as:
+- Which system owns a piece of data or gameplay logic?
+- Which systems may communicate directly?
+- When should events/interfaces be used?
+- What responsibilities belong to an entity versus a system?
 
-Mining owns mining gameplay but does not own resource physics.
+Use this document for questions such as:
+- Which Godot folder should contain this file?
+- Where should a new C# system be placed?
+- Where should a scene, asset, or data definition live?
 
-Resources own logical resource representation. Logical resources are separate from physical representations.
-
-Physics owns physical simulation and collisions and should remain replaceable/optimizable for Android.
-
-Logistics owns transportation, storage, and jobs. JobSystem creates/manages jobs; WorkerAI selects suitable jobs.
-
-Machines transform inputs into outputs and do not directly control UI, economy, or output physics.
-
-Economy owns money, selling, and market rules.
-
-Progression owns upgrades, unlocks, and prestige.
-
-Simulation coordinates game-time progression. Not every system needs to update every frame.
-
-Save owns persistence.
-
-UI displays state and sends player commands; it should not directly manipulate gameplay internals.
-
-# Communication rules
-
-1. Rendering/UI does not own gameplay.
-2. Worker does not directly control Economy.
-3. Machine does not directly manipulate UI.
-4. UI does not directly modify worker internals.
-5. Mining does not directly manipulate physics internals.
-6. Market does not need to know how workers operate.
-7. Systems communicate through clear interfaces/events where practical.
-8. Entities represent things; systems own gameplay rules and data.
-9. A system should have one clear responsibility.
-10. Do not create planned scripts merely because they appear in this document.
-
-# Main flows
-
-Mining: WorkerAI → JobSystem → MiningJob → MiningSystem → Terrain destroyed → Resources created → ResourceManager → PhysicsWorld
-
-Machine processing: Machine → Processing complete → Resource created → EventBus / ResourceManager → PhysicsWorld
-
-Logistics: LogisticsSystem / JobSystem → TransportJob → WorkerAI → WorkerMovement → WorkerInventory → Storage
-
-Selling: Player / AutoSell → SellingSystem → Market → Money → EventBus → StatisticsSystem / UI
-
-# Optional / future
-
-Online functionality such as leaderboards is not part of the core architecture. If added later, it should be a separate optional system.
-
-# Document authority
-
-TechnicalArchitecture.txt is authoritative for system responsibilities, architectural rules, communication, ownership boundaries, and interactions.
-
-GodotProjectStructure.txt is authoritative for Godot folder organization, scene organization, planned script locations, and asset/data organization.
+The two documents should remain synchronized when the architecture or physical organization changes.
