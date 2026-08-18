@@ -1,1064 +1,518 @@
-TechnicalArchitecture.txt is the authority for:
+StoneWorks — Technical Architecture
 
-* system responsibilities
-* architectural rules
-* communication rules
-* ownership boundaries
-* system interactions
+Authority
+--------
+This document is authoritative for:
+- system responsibilities
+- ownership boundaries
+- communication rules
+- system interactions
+- architectural decisions
+
+GodotProjectStructure.txt is authoritative for physical file/folder organization.
+When architecture changes, update both documents together.
+
+Core rule
+---------
+Systems own gameplay rules and system-level data.
+Entities represent things that exist in the world.
+Scenes represent Godot composition and presentation/physical representation.
+UI presents state and sends commands; it does not own gameplay rules.
+Systems communicate through narrow APIs/commands and events rather than reaching into each other's internals.
+
+Every C# script should have a short comment at the top describing its role, rules, and important dependencies.
 
 
-> **Systems own data and rules. Entities represent things in the world. Systems communicate through clear interfaces/events rather than directly controlling everything.**
+1. High-level architecture
+---------------------------
 
-== ALWAYS WRITE IN COMMENTS AT THE TOP OF A SCRIPT IT'S ROLES, RULES AND DEPENDENCIES ==
-
-# 1. High-level architecture
-
-Starting Major Systems:
-
-                         GAME
+                         Game
                           │
               ┌───────────┴───────────┐
               │                       │
-        SimulationSystem          SaveSystem
-              │
-      ┌───────┼────────┬──────────┐
-      │       │        │          │
-   Workers  Mining  Machines   Economy
-      │       │        │          │
-      └───────┼────────┴──────────┘
-              │
-        ResourceSystem
-              │
-       ┌──────┴──────┐
-       │             │
-    Physics       Inventory
-       │
-    Rendering
-       │
-       UI
+            Core                  Simulation
+              │                       │
+              │              ┌────────┼─────────┐
+              │              │        │         │
+              │           Workers   Mining   Machines
+              │              │        │         │
+              │              └────────┼─────────┘
+              │                       │
+              │                   Resources
+              │                       │
+              │                ┌──────┴──────┐
+              │                │             │
+              │             Physics      Logistics
+              │                              │
+              │                           Economy
+              │                              │
+              └──────────────┬───────────────┘
+                             Save
+
+UI observes state/events and sends commands to the appropriate system. Rendering never becomes the owner of gameplay state.
 
 
-There's an important distinction:
+2. Core vs Simulation
+---------------------
 
-**Rendering should not own gameplay.**
-
-A gem's visual representation shouldn't decide whether the gem exists, how much it is worth, or whether it belongs in the warehouse.
-
----
+Core contains application-wide infrastructure and state that should exist independently of the simulation loop:
 
 Game
-→ coordinates the whole application
+- application coordinator
+- creates/connects systems
+- controls startup/shutdown
+- does not contain gameplay rules
 
 GameState
-→ contains persistent/current game state
-
-SimulationSystem
-→ advances game time and tells systems to update
-
-World
-→ contains the physical game world
-
-Systems
-→ contain gameplay rules
-
-Entities
-→ represent things existing in the world
-
----
-
-# 2. Suggested folder structure
-
-start with something like this:
-
-
-Scripts/
-│
-├── Core/
-│   ├── Game.cs
-│   ├── GameState.cs
-│   ├── GameTime.cs
-│   └── EventBus.cs
-│
-├── World/
-│   ├── World.cs
-│   ├── WorldGrid.cs
-│   ├── Terrain.cs
-│   └── Mine.cs
-│
-├── Workers/
-│   ├── Worker.cs
-│   ├── WorkerManager.cs
-│   ├── WorkerAI.cs
-│   ├── WorkerJob.cs
-│   ├── JobSystem.cs
-│   └── WorkerInventory.cs
-│
-├── Resources/
-│   ├── Resource.cs
-│   ├── ResourceType.cs
-│   ├── ResourceManager.cs
-│   └── ResourceStack.cs
-│
-├── Physics/
-│   ├── ResourcePhysics.cs
-│   ├── PhysicsWorld.cs
-│   └── PhysicsBody.cs
-│
-├── Machines/
-│   ├── Machine.cs
-│   ├── MachineManager.cs
-│   ├── ProcessingMachine.cs
-│   └── MachineRecipe.cs
-│
-├── Logistics/
-│   ├── LogisticsSystem.cs
-│   ├── TransportJob.cs
-│   └── Storage.cs
-│
-├── Economy/
-│   ├── EconomySystem.cs
-│   ├── Market.cs
-│   ├── GemMarket.cs
-│   └── SellingSystem.cs
-│
-├── Progression/
-│   ├── UpgradeSystem.cs
-│   ├── UnlockSystem.cs
-│   └── PrestigeSystem.cs
-│
-├── Simulation/
-│   ├── SimulationSystem.cs
-│   ├── SimulationTick.cs
-│   └── StatisticsSystem.cs
-│
-├── Save/
-│   ├── SaveSystem.cs
-│   └── SaveData.cs
-│
-├── UI/
-│   ├── MainUI.cs
-│   ├── WorkerUI.cs
-│   ├── MarketUI.cs
-│   ├── UpgradeUI.cs
-│   └── PrestigeUI.cs
-│
-└── Online/
-    └── LeaderboardSystem.cs
-
-
-This is a **planned structure**, not a list of scripts we should immediately create.
-
----
-
-# 3. The most important systems
-
-## Core
-
-### `Game.cs`
-
-The central coordinator.
-
-It shouldn't contain gameplay logic.
-
-Its job is basically:
-
-
-Start game
-    ↓
-Initialize systems
-    ↓
-Load save
-    ↓
-Start simulation
-
-
-It knows that the systems exist, but shouldn't know how mining works.
-
----
-
-### `GameTime.cs`
-
-Controls game time.
-
-For example:
-
+- current persistent gameplay state shared at save/load boundaries
+- money, progression, unlocked content, relevant world state, etc.
+- is a state container, not a system that performs gameplay
 
 GameTime
-├── delta time
-├── simulation speed
-├── paused
-└── offline time
+- simulation clock
+- pause/speed/time information
+- offline-time calculation support
 
-
-This becomes especially useful later for idle mechanics.
-
----
-
-### `EventBus.cs`
-
-This could become extremely useful.
-
-Instead of:
-
-
-Worker → Machine
-Worker → Economy
-Worker → UI
-Worker → Statistics
-
-
-we can do:
-
-
-Worker
-   ↓
 EventBus
-   ↓
-┌────────────┬──────────────┬──────────────┐
-Machine      Statistics     UI
-
-
-For example:
-
-
-ResourceCreated
-ResourcePickedUp
-ResourceDelivered
-MachineFinished
-GemProduced
-GemSold
-WorkerUnlocked
-PrestigePerformed
-
-
-This dramatically reduces dependencies between systems.
-
----
-
-# 4. World system
-
-The world contains the actual game environment.
-
-
-World
-├── Terrain
-├── Mine
-├── Ground
-├── Machines
-├── Warehouse
-└── Workers
-
-
-### `WorldGrid.cs`
-
-This is particularly important because your mine is grid-based.
-
-It knows:
-
-
-Grid cell
-├── empty
-├── stone
-├── dirt
-├── ore
-├── occupied
-└── destroyed
-
-
-The grid is **gameplay data**.
-
-The visual tiles are just the representation of that data.
-
----
-
-# 5. Mining system
-
-The mining system controls:
-
-
-Mine
- ↓
-Find mining jobs
- ↓
-Worker takes job
- ↓
-Dynamite
- ↓
-Explosion
- ↓
-Terrain destroyed
- ↓
-Resources generated
-
-
-Importantly:
-
-**Mining does not own resource physics.**
-
-It simply says:
-
-> "These 17 stones have been created at this position."
-
-Then the resource/physics systems take over.
-
----
-
-# 6. Resources
-
-I'd separate the **logical resource** from its physical representation.
-
-For example:
-
-```text
-Resource
-├── type = Stone
-├── amount = 1
-├── quality
-└── state
-```
-
-And separately:
-
-```text
-ResourcePhysicsBody
-├── position
-├── velocity
-├── collision
-└── visual
-```
-
-This distinction will be very valuable.
-
----
-
-# 7. Physics system
-
-This is where your new requirement becomes important.
-
-You have:
-
-```text
-                 MACHINE
-                    │
-                    ▼
-              ┌───────────┐
-              │  GEMS     │
-              │  STONES   │
-              └───────────┘
-                    │
-                    ▼
-              physics falls
-                    │
-             ┌──────┴──────┐
-             │             │
-          ground         resources
-             │             │
-             └──────┬──────┘
-                    ▼
-                 settle
-```
-
-I'd create a dedicated:
-
-### `PhysicsWorld.cs`
-
-Responsible for:
-
-* gravity
-* collision detection
-* collision resolution
-* ground collision
-* resource/resource collision
-* sleeping/resting objects
-* physics updates
-
-And:
-
-### `ResourcePhysics.cs`
-
-Responsible for translating a resource into a physical object.
-
-For example:
-
-```text
-Stone created
-    ↓
-ResourceManager
-    ↓
-PhysicsWorld.CreateBody()
-    ↓
-Stone falls
-    ↓
-Collides with ground
-    ↓
-Collides with other stones
-    ↓
-Eventually rests
-```
-
-### Important optimization
-
-We should **not necessarily use Godot's full rigid-body physics for every stone and gem**.
-
-If the game eventually produces hundreds or thousands of pieces, Android performance could suffer badly.
-
-We should probably design the architecture so that the physics implementation can later be optimized.
-
-For example:
-
-```text
-IPhysicsBody
-      │
-      ├── GodotPhysicsBody
-      │
-      └── OptimizedResourcePhysicsBody
-```
-
-We don't have to implement that abstraction immediately, but designing around the possibility is smart.
-
----
-
-# 8. Machines
-
-Machines should have a very simple responsibility:
-
-> **Transform inputs into outputs.**
-
-For example:
-
-```text
-ProcessingMachine
-
-Input:
-Stone
-
-Processing:
-2 seconds
-
-Output:
-Gem
-```
-
-The machine doesn't decide where the gem goes.
-
-It produces the gem.
-
-Then:
-
-```text
-Machine
-   ↓
-GemCreated
-   ↓
-ResourceSystem
-   ↓
-PhysicsSystem
-```
-
-So the gem physically falls out of the machine.
-
-That's a nice clean separation.
-
----
-
-# 9. Logistics
-
-This deserves its own system because logistics is one of the main gameplay mechanics.
-
-```text
-LogisticsSystem
-│
-├── Pickup jobs
-├── Delivery jobs
-├── Machine supply jobs
-├── Warehouse jobs
-└── Gem sorting jobs
-```
-
-Workers ask:
-
-> "What job should I do?"
-
-The job system responds:
-
-```text
-Available jobs:
-
-Mining
-Transport stone
-Feed machine
-Transport gems
-Sort red gems
-Transport gems to warehouse
-```
-
-The worker chooses a suitable job based on:
-
-* assigned role
-* distance
-* priority
-* carrying capacity
-* availability
-* current situation
-
----
-
-# 10. Worker system
-
-I'd keep workers relatively dumb.
-
-Don't make:
-
-```text
-Worker.cs
-```
-
-contain:
-
-* mining
-* pathfinding
-* inventory
-* economy
-* machine logic
-* resource generation
-* market logic
-
-Instead:
-
-```text
-Worker
-│
-├── WorkerAI
-├── WorkerInventory
-├── WorkerMovement
-└── WorkerJob
-```
-
-And globally:
-
-```text
-JobSystem
-```
-
-creates jobs.
-
-So the relationship becomes:
-
-```text
-JobSystem
-    │
-    ▼
-Available Job
-    │
-    ▼
-WorkerAI
-    │
-    ▼
-Worker accepts job
-    │
-    ▼
-WorkerMovement
-    │
-    ▼
-Worker performs action
-```
-
-This is a very important architectural decision.
-
----
-
-# 11. Worker climbing
-
-Since workers can climb essentially anywhere, I would **not start with traditional navigation meshes**.
-
-Instead, we can eventually make movement based on the terrain/grid.
-
-Something like:
-
-```text
-             worker
-               ↓
-        ┌───┬───┬───┐
-        │   │   │   │
-        ├───┼───┼───┤
-        │   │   │   │
-        ├───┼───┼───┤
-        │   │ █ │   │
-        └───┴───┴───┘
-```
-
-The worker can:
-
-```text
-walk
-climb
-drop
-jump/fall
-```
-
-depending on the terrain.
-
-This could be considerably simpler than conventional pathfinding.
-
----
-
-# 12. Inventory and storage
-
-We should distinguish:
-
-### Worker inventory
-
-Small temporary inventory.
-
-```text
-Worker
-└── Inventory
-    ├── stone × 3
-    └── gems × 1
-```
-
-### Machine inventory
-
-```text
-Machine
-├── input
-└── output
-```
-
-### Warehouse
-
-Large persistent inventory.
-
-```text
-Warehouse
-├── stone
-├── red gems
-├── blue gems
-├── green gems
-├── ...
-└── yellow gems
-```
-
-The actual inventory logic belongs in the resource/logistics side, not in the UI.
-
----
-
-# 13. Economy
-
-The economy should have no knowledge of workers.
-
-It cares about:
-
-Gem
- ↓
-Market
- ↓
-Price
- ↓
-Sell
- ↓
-Money
-
-Six gem colors:
-
-Red
-Blue
-Green
-Yellow
-Purple
-Orange
-
-
-We can decide the exact seven later.
-
-Each has:
-
-base value
-current market price
-minimum price
-maximum price
-market trend
-
-The market can then fluctuate independently.
-
----
-
-# 14. Progression
-
-Progression should be completely separate from the economy.
-
-
-UpgradeSystem
-│
-├── Mining upgrades
-├── Worker upgrades
-├── Logistics upgrades
-├── Machine upgrades
-└── Warehouse upgrades
-
-
-And:
-
-PrestigeSystem
-│
-├── Calculate prestige reward
-├── Reset temporary progression
-├── Keep permanent upgrades
-└── Start new run
-
-
-That means prestige doesn't have to know anything about how a worker actually mines.
-
-It simply resets the appropriate game state.
-
----
-
-# 15. Simulation system
-
-This is especially important for an idle game.
-
-I'd have:
-
+- lightweight publish/subscribe mechanism for domain events
+- events communicate facts, not commands
+- should not become a hidden service locator
+
+Simulation contains the rules for advancing the game:
 
 SimulationSystem
+- owns the simulation update loop and update scheduling
+- decides which systems receive which simulation ticks
+- coordinates ordering where ordering matters
+- does not implement mining, worker AI, market rules, etc.
+
+SimulationTick
+- small value/context describing an update step when needed
+
+StatisticsSystem
+- observes simulation/domain events and periodically records statistics
+- does not drive gameplay
+
+Not everything updates every frame:
+- physics: physics ticks
+- worker movement/AI: simulation ticks as required
+- machines: timers/events or appropriate simulation ticks
+- market: coarse intervals
+- statistics: coarse intervals
+- idle/offline calculations: explicit larger intervals
 
 
-coordinate the passage of game time.
+3. World, Mine, and WorldGrid
+-----------------------------
 
-Conceptually:
+World is the top-level owner of the spatial game world.
+It knows what world-level entities/areas exist and provides the spatial context in which systems operate.
+It does not own mining rules, worker AI, economy rules, or resource physics.
 
+Mine is the gameplay representation of the mine area.
+It owns the mine's terrain/grid state and exposes operations such as querying a cell and destroying terrain.
+MiningSystem decides when and why terrain is mined; Mine performs the world-state operation.
 
-Simulation tick
-      │
-      ├── Worker updates
-      ├── Job updates
-      ├── Machine updates
-      ├── Market updates
-      ├── Physics updates
-      └── Statistics updates
+WorldGrid is the data structure used by the mine to represent grid cells.
+It contains gameplay-relevant cell state, not TileMap visuals.
+Typical cell states may include empty, stone, dirt, ore, occupied, and destroyed.
 
+Terrain is the visual/scene representation of terrain data.
+Changing a tile must not silently become the source of truth for mine state.
 
-But we should **not necessarily update everything every frame**.
+Relationship:
 
-For example:
+World
+  └── Mine
+       └── WorldGrid (gameplay data)
+             ↓
+          Terrain / TileMap (visual representation)
 
-Physics          → every physics tick
-Worker movement  → every physics tick
-Machines         → event/timer based
-Market           → every few seconds
-Statistics       → every few seconds
-Idle calculations → larger intervals
-
-
-This will matter enormously on Android.
-
----
-
-# 16. Communication plan
-
-This is probably the most important part.
-
-I would define communication like this:
+Machines, workers, warehouse, and other world entities exist in the World but remain owned by their appropriate systems/entities.
 
 
-                  ┌─────────────┐
-                  │ Event Bus   │
-                  └──────┬──────┘
-                         │
-       ┌─────────────────┼──────────────────┐
-       │                 │                  │
-       ▼                 ▼                  ▼
-   Workers            Resources          Machines
-       │                 │                  │
-       └─────────────────┼──────────────────┘
-                         │
-                         ▼
-                      Economy
-                         │
-                         ▼
-                         UI
+4. Resources: logical data vs physical representation
+------------------------------------------------------
+
+Do not create a mandatory central ResourceManager merely to make resources globally accessible.
+For the current game design, it would become a god-object risk.
+
+ResourceData
+- static definition/configuration of a resource type
+- name, category, base value, visual references, etc.
+
+ResourceType
+- stable identifier/category for resource types
+
+Resource
+- logical resource entity/state
+- type, quantity, quality and relevant gameplay state
+- has no responsibility for collision simulation
+
+ResourceStack
+- grouped logical inventory quantity where appropriate
+
+ResourcePhysics / PhysicsBody
+- physical representation and runtime physics state
+- position, velocity, collision, sleeping/resting state, etc.
+
+PhysicsWorld
+- owns physical simulation and collision resolution
+
+The logical resource and physical body must remain separable:
+
+Resource created
+    ↓
+logical Resource
+    ↓
+physical representation created when required
+    ↓
+PhysicsWorld simulates it
+    ↓
+resource can later be picked up/stored
+    ↓
+physical representation can be removed while logical ownership continues
+
+This allows the game to avoid unnecessary physics objects for resources that are already stored and leaves room for a future optimized resource-physics implementation.
+
+A central ResourceManager may be introduced later only if a concrete ownership/lookup requirement appears. It is not part of the baseline architecture.
 
 
-### Example: mining
+5. Physics
+---------
+
+PhysicsWorld owns:
+- gravity
+- physical update
+- collision detection/resolution
+- ground/environment collision
+- resource/resource collision
+- sleeping/resting behavior
+
+ResourcePhysics translates logical resources that need physical simulation into physical bodies.
+
+The first implementation may use Godot physics where appropriate. The architecture must not assume that every resource permanently requires a full rigid-body node; performance-oriented implementations can be introduced later behind the same responsibility boundary.
+
+Mining and machines may request creation of physical resources, but they do not directly manipulate collision internals.
 
 
-WorkerAI
-   │
-   ▼
-JobSystem
-   │
-   ▼
-MiningJob
-   │
-   ▼
-Mine
-   │
-   ▼
-Terrain destroyed
-   │
-   ▼
-Resources created
-   │
-   ▼
-ResourceSystem
-   │
-   ▼
-PhysicsSystem
+6. Mining
+---------
+
+MiningSystem owns mining rules:
+- deciding available mining work
+- validating mining actions
+- applying mining effects
+- creating resources as a consequence of mining
+
+MiningJob is a job type describing a mining task.
+Dynamite is a mining action/tool rather than a general physics system.
+
+MiningSystem requests Mine operations. It does not edit TileMap nodes directly and does not resolve resource collisions.
+
+Basic flow:
+
+Worker receives MiningJob
+      ↓
+MiningSystem validates/performs mining
+      ↓
+Mine changes WorldGrid
+      ↓
+Resources are created
+      ↓
+Resource/Physics systems handle resulting physical resources
+      ↓
+Events inform statistics/UI/etc.
 
 
----
+7. Jobs vs Logistics
+--------------------
 
-### Example: machine produces a gem
+JobSystem owns the generic job lifecycle:
+- available jobs
+- claiming/assignment
+- job state
+- priorities/eligibility
+- completion/cancellation
 
+It should know how a job behaves as a job, not how every gameplay domain performs the work.
 
-Machine
-   │
-   ▼
-Processing complete
-   │
-   ▼
-Gem created
-   │
-   ├───────────────► Statistics
-   │
-   ├───────────────► UI
-   │
-   ▼
-PhysicsSystem
-   │
-   ▼
-Gem falls
-   │
-   ▼
-Ground / other gems
+Domain systems create domain-specific jobs:
+- MiningSystem creates MiningJob
+- LogisticsSystem creates transport/delivery jobs
+- Machines may request supply work through LogisticsSystem
 
+LogisticsSystem owns logistics rules:
+- deciding what should be transported
+- pickup/delivery requirements
+- storage routing
+- machine supply and warehouse movement
+- creating the appropriate transport jobs
 
----
-
-### Example: worker transports a gem
-
+Therefore:
 
 LogisticsSystem
-      │
-      ▼
-TransportJob
-      │
-      ▼
+    ↓ creates logistics work
+JobSystem
+    ↓ assigns/manages job lifecycle
 WorkerAI
-      │
-      ▼
+    ↓ executes accepted job
+WorkerMovement / WorkerInventory
+    ↓ performs physical actions
+
+JobSystem is the generic job mechanism. LogisticsSystem is a domain system that uses it. They are not duplicates.
+
+
+8. Workers
+----------
+
+Worker is the world entity/state for an individual worker.
+
+WorkerAI
+- chooses/accepts work and decides the worker's next action
+- does not contain mining/economy/machine rules
+
 WorkerMovement
-      │
-      ▼
-Pick up gem
-      │
-      ▼
+- movement, climbing, falling and navigation execution
+- should use mine/world data rather than requiring a traditional navigation mesh initially
+
 WorkerInventory
-      │
-      ▼
-Move to warehouse
-      │
-      ▼
-Warehouse
-      │
-      ▼
-Resource stored
+- temporary carried logical resources
+
+WorkerJob
+- current job reference/state from the worker's perspective
+
+WorkerManager should only exist if a concrete collection/lifecycle ownership need appears. Do not create manager classes merely because they are common in other projects.
+
+Workers should request/perform actions through system APIs rather than directly modifying unrelated systems.
 
 
----
+9. Machines
+-----------
 
-### Example: selling
+Machine represents a machine entity and its local state.
+MachineManager is only justified if centralized machine lifecycle/lookup is required.
 
-```text
-Player / AutoSell
-       │
-       ▼
-SellingSystem
-       │
-       ▼
-Market
-       │
-       ▼
-Current gem price
-       │
-       ▼
-Money added
-       │
-       ▼
-EventBus
-       │
-       ├── Statistics
-       └── UI
+ProcessingMachine owns machine-specific processing state/rules.
+MachineRecipe defines configurable input/output/timing data.
+
+A machine transforms inputs into outputs. It does not decide warehouse routing, economy effects, or UI presentation.
+
+Example:
+
+Machine processing completes
+      ↓
+logical Gem created
+      ↓
+physical Gem created if it should enter the world physically
+      ↓
+PhysicsWorld handles falling/collision
+      ↓
+Logistics later handles pickup/storage
 
 
----
+10. Economy
+-----------
 
-# 17. What should NOT communicate directly
+EconomySystem owns economy-wide rules.
+Market owns market state/price behavior.
+GemMarket contains gem-specific market configuration/rules only if that separation remains useful.
+SellingSystem performs selling transactions through the economy APIs.
 
-I'd establish some rules now.
-
-### ❌ Worker → Economy
-
-A worker shouldn't directly change the player's money.
-
-### ❌ Machine → UI
-
-A machine shouldn't directly manipulate UI labels.
-
-### ❌ UI → Worker internals
-
-UI should send a command:
-
-> "Assign this worker to mining."
-
-rather than modifying ten fields inside the worker.
-
-### ❌ Mining → Physics internals
-
-Mining should create physical resources, not manually control their velocity/collision.
-
-### ❌ Market → Worker
-
-The market shouldn't care how workers operate.
-
-This keeps the systems independent.
-
----
-
-# 18. The central gameplay flow
-
-Eventually, our architecture should make this possible:
+Economy must not depend on worker implementation details.
+Selling changes game state through the economy system, which can publish an event for statistics/UI.
 
 
-                    PLAYER
-                      │
-                      ▼
-                  Game State
-                      │
-          ┌───────────┴───────────┐
-          │                       │
-       WORLD                  PROGRESSION
-          │                       │
-     ┌────┴────┐                  │
-     │         │                  │
-   MINE     MACHINES              │
-     │         │                  │
-     ▼         ▼                  │
- RESOURCES → GEMS                 │
-     │         │                  │
-     └────┬────┘                  │
-          ▼                       │
-      LOGISTICS                   │
-          │                       │
-          ▼                       │
-       STORAGE                    │
-          │                       │
-          ▼                       │
-        MARKET                    │
-          │                       │
-          ▼                       │
-         MONEY ───────────────────┘
+11. Progression
+---------------
+
+UpgradeSystem owns upgrade effects and purchase rules.
+UnlockSystem owns content-unlock rules.
+PrestigeSystem owns prestige calculation/reset rules.
+
+Progression may read economy/game state through defined interfaces, but progression systems should not reach into unrelated entity internals.
 
 
-And the workers operate primarily inside the **World + Logistics + Mining** portion.
+12. Save system
+---------------
 
----
+SaveSystem owns serialization/deserialization and save/load operations.
+SaveData is a persistence DTO/container, not the runtime owner of gameplay rules.
 
-# 19. One thing I'd change from the start
-
-Because you're targeting Android and expect potentially many workers and resources, I'd divide the game into two layers:
-
-### Simulation layer
-
-Worker data
-Resource data
-Machine data
-Inventory
-Economy
-Jobs
-Terrain
+Systems expose the state required for saving through explicit save interfaces or state objects.
+SaveSystem should not manipulate gameplay internals directly.
 
 
-### Presentation layer
+13. Godot scenes and C# systems
+-------------------------------
 
-Worker sprites
-Gem sprites
-Stone sprites
-Machine animations
-Particles
-UI
-Camera
-Effects
+Scenes are composition and presentation boundaries, not the architecture's gameplay authority.
+
+Main scene
+  ↓
+Game node / application coordinator
+  ↓
+creates or connects runtime systems
+  ↓
+systems operate on gameplay state
+  ↓
+scene nodes present/represent the relevant state
+
+Rules:
+- A scene script may call a system's public command/query API.
+- A scene script must not modify another system's private state.
+- UI should send commands and subscribe to relevant events/state changes.
+- Visual nodes may represent entities, but the visual node is not automatically the source of truth.
+- Systems should not search the scene tree for arbitrary nodes to perform gameplay.
+- Avoid global singletons unless a service genuinely must be globally accessible and has a clear lifecycle.
+
+For physical entities such as workers, machines and physical resources, the Godot node can be the visual/physics representation while logical gameplay state remains owned by the appropriate entity/system.
 
 
-That means, eventually, the game could have **100 workers logically simulated without requiring 100 extremely expensive Godot nodes doing complicated work every frame.**
+14. Communication rules
+-----------------------
 
-And the same applies to stones and gems.
+Prefer this:
 
-This is something I'd design into the architecture **before** we start coding.
+UI → command/API → owning system
+System → domain event → EventBus → interested systems/UI
 
----
+Avoid this:
 
-# 20. The first scripts I would actually create
+UI → private worker fields
+Machine → UI labels
+Worker → Economy internals
+Mining → Physics internals
+Market → Worker internals
+System → arbitrary GetNode() calls across the scene tree
 
-Not 40 scripts.
+Commands mean "please perform this action".
+Events mean "this fact happened".
+Queries mean "give me read-only information".
 
-I'd begin with just these:
+Use direct calls when a clear ownership relationship exists. Do not use EventBus for every method call.
 
+Examples of useful events:
+- ResourceCreated
+- ResourcePickedUp
+- ResourceDelivered
+- MachineFinished
+- GemProduced
+- GemSold
+- WorkerUnlocked
+- PrestigePerformed
+
+
+15. System size and manager policy
+----------------------------------
+
+Start smaller than the final design.
+A planned system/file is not automatically required.
+
+Create a separate system when at least one of these is true:
+- it owns a meaningful set of rules
+- it has a distinct update cadence/lifecycle
+- it has an independent reason to change
+- keeping it in another class would create a clear responsibility violation
+
+Avoid:
+- empty manager classes
+- one-class wrappers with no ownership value
+- global registries without a concrete need
+- giant systems containing several unrelated domains
+
+It is acceptable for an early implementation to have fewer classes than the planned architecture. Split classes when real complexity appears, not in anticipation of it.
+
+
+16. Initial script map
+----------------------
+
+The intended baseline is:
 
 Core/
-    Game.cs
-    GameTime.cs
-    EventBus.cs
+- Game.cs
+- GameState.cs
+- GameTime.cs
+- EventBus.cs
 
 World/
-    World.cs
-    WorldGrid.cs
-
-Resources/
-    ResourceType.cs
-    ResourceData.cs
-
-Simulation/
-    SimulationSystem.cs
-
-
-Then establish the basic communication pattern.
-
-After that:
-
-
-Mining/
-    MiningSystem.cs
+- World.cs
+- WorldGrid.cs
+- Terrain.cs
+- Mine.cs
 
 Workers/
-    Worker.cs
-    WorkerAI.cs
-    JobSystem.cs
+- Worker.cs
+- WorkerAI.cs
+- WorkerJob.cs
+- WorkerMovement.cs
+- WorkerInventory.cs
+
+Resources/
+- Resource.cs
+- ResourceData.cs
+- ResourceType.cs
+- ResourceStack.cs
 
 Physics/
-    PhysicsWorld.cs
+- PhysicsWorld.cs
+- ResourcePhysics.cs
+- PhysicsBody.cs
+
+Mining/
+- MiningSystem.cs
+- MiningJob.cs
+- Dynamite.cs
+
+Logistics/
+- LogisticsSystem.cs
+- JobSystem.cs
+- TransportJob.cs
+- Storage.cs
+
+Machines/
+- Machine.cs
+- ProcessingMachine.cs
+- MachineRecipe.cs
+
+Economy/
+- EconomySystem.cs
+- Market.cs
+- GemMarket.cs
+- SellingSystem.cs
+
+Progression/
+- UpgradeSystem.cs
+- UnlockSystem.cs
+- PrestigeSystem.cs
+
+Simulation/
+- SimulationSystem.cs
+- SimulationTick.cs
+- StatisticsSystem.cs
+
+Save/
+- SaveSystem.cs
+- SaveData.cs
+
+UI/
+- MainUI.cs
+- WorkerUI.cs
+- MarketUI.cs
+- UpgradeUI.cs
+- PrestigeUI.cs
+
+This is a target map, not a creation checklist. A script should be added only when its responsibility is needed.
 
 
-Then machines, logistics, economy, etc.
+17. Architectural decision summary
+-----------------------------------
 
-That gives us a **vertical foundation** rather than creating an enormous empty architecture.
-
----
-
-
-For this game, let's deliberately enforce:
-
-> **One system = one responsibility.**
-
-And:
-
-> **Data ownership should always be obvious.**
-
-For every new feature we add, we should be able to ask:
-
-**"Which system owns this?"**
-
-If the answer is something like *"Well, `Game.cs` probably needs to do it..."*, that's a warning sign.
-
-I think this gives us a very solid foundation for the next step: **define the actual data model and communication events**—things like `ResourceCreated`, `JobCreated`, `JobCompleted`, `MachineFinished`, `ResourcePickedUp`, `ResourceDelivered`, `GemSold`, etc. That should happen **before we define the individual worker/machine scripts**, because those events will form the backbone of the whole game.
+1. Core = application infrastructure/state; Simulation = advancing gameplay.
+2. No baseline ResourceManager; resources are owned through their actual domain/state holders.
+3. World owns the world; Mine owns mine terrain state; WorldGrid stores grid data; Terrain renders it.
+4. Logical Resource and physical ResourcePhysicsBody are separate responsibilities.
+5. JobSystem manages generic jobs; LogisticsSystem owns transport/logistics rules and creates logistics jobs.
+6. Godot scenes represent/combine things; C# systems own gameplay rules; communication uses APIs, queries and events.
+7. Managers are optional and must earn their existence through a real ownership/lifecycle need.
+8. Start with the smallest useful implementation and split systems only when complexity justifies it.
