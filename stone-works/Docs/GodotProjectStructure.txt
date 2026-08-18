@@ -2,11 +2,11 @@ StoneWorks — Godot Project Structure
 
 Purpose
 -------
-This document defines where project files belong in the Godot project.
+This document defines where project files belong in the Godot project and how planned C# scripts map to Godot scene nodes.
 
-TechnicalArchitecture.txt is authoritative for system responsibilities, ownership, communication, and interactions. This document is authoritative for physical Godot folder organization.
+TechnicalArchitecture.txt is authoritative for system responsibilities, ownership, communication, and interactions. This document is authoritative for physical Godot folder organization, scene structure, node types, and script-to-node attachment.
 
-The repository now contains the planned C# script skeletons. Skeletons define class/file boundaries only; they do not mean the gameplay functionality is implemented.
+The repository contains the planned C# script skeletons. Skeletons define class/file boundaries only; they do not mean the gameplay functionality is implemented.
 
 
 1. Current project structure
@@ -15,17 +15,28 @@ The repository now contains the planned C# script skeletons. Skeletons define cl
 stone-works/
 ├── project.godot
 ├── Scenes/
-│   └── main.tscn
+│   ├── main.tscn
+│   ├── World/
+│   │   ├── World.tscn
+│   │   ├── Mine.tscn
+│   │   └── Warehouse.tscn
+│   ├── Workers/
+│   │   └── Worker.tscn
+│   ├── Machines/
+│   │   ├── ProcessingMachine.tscn
+│   │   └── ...
+│   ├── Resources/
+│   │   ├── Stone.tscn
+│   │   └── Gem.tscn
+│   └── UI/
+│       ├── MainUI.tscn
+│       ├── WorkerUI.tscn
+│       ├── MarketUI.tscn
+│       ├── UpgradeUI.tscn
+│       └── PrestigeUI.tscn
 ├── Scripts/
 │   ├── Core/
-│   │   ├── EventBus.cs
-│   │   ├── Game.cs
-│   │   ├── GameState.cs
-│   │   └── GameTime.cs
 │   ├── Managers/
-│   │   ├── ResourceManager.cs
-│   │   ├── WorkerManager.cs
-│   │   └── MachineManager.cs
 │   ├── Economy/
 │   ├── Logistics/
 │   ├── Machines/
@@ -41,6 +52,7 @@ stone-works/
 ├── Assets/
 │   ├── Sprites/
 │   ├── Tilesets/
+│   ├── Backgrounds/
 │   ├── Workers/
 │   ├── Machines/
 │   ├── Resources/
@@ -54,9 +66,9 @@ stone-works/
 ├── Saves/
 └── Docs/
 
-All listed domain folders now contain their planned C# skeletons. Parallax controllers are also present as presentation infrastructure.
+All listed domain folders contain their planned C# skeletons. Parallax controllers are also present as presentation infrastructure.
 
-Background artwork is a planned asset category; Assets/Backgrounds/ should be created when the first parallax background asset is added.
+Background artwork belongs in Assets/Backgrounds/ when the first parallax background asset is added.
 
 
 2. Folder responsibilities
@@ -180,29 +192,387 @@ ParallaxBackgroundController coordinates scripted parallax presentation and the 
 JobSystem belongs to Logistics because it is the generic job mechanism used by domain systems such as Mining and Logistics.
 
 
-4. Planned scene organization
+4. Godot node types and script attachments
+-------------------------------------------
+
+This section defines which C# scripts are attached to Godot nodes and which scripts remain plain runtime/data classes.
+
+Important rule:
+- A script is attached to a Godot node only when the script represents a persistent scene object, runtime system, controller, or presentation object that benefits from Godot's scene tree and lifecycle.
+- A script does NOT need its own node merely because it is a C# class.
+- Data/value objects such as ResourceType, ResourceData, ResourceStack, MachineRecipe, SaveData, and job/data classes remain plain C# objects unless implementation later gives them a concrete Godot resource/node role.
+- Node types below describe the intended architecture. They do not imply that every planned scene has already been created.
+
+4.1 Main scene and application root
+
+Scenes/main.tscn
+    Main — Node2D
+        Script: Game.cs
+        Role: Top-level application coordinator.
+
+        Child nodes planned:
+        ├── Managers — Node
+        │   ├── ResourceManager — Node
+        │   │   Script: ResourceManager.cs
+        │   ├── WorkerManager — Node
+        │   │   Script: WorkerManager.cs
+        │   └── MachineManager — Node
+        │       Script: MachineManager.cs
+        │
+        ├── Simulation — Node
+        │   └── SimulationSystem — Node
+        │       Script: SimulationSystem.cs
+        │
+        ├── World — Node2D
+        │   Script: World.cs
+        │
+        └── UI — Control
+            Script: MainUI.cs
+
+The exact child-node names may change during scene construction, but the script ownership must remain consistent with this document.
+
+The current main.tscn contains a Main Node2D. The Game.cs script is intended for this node.
+
+
+4.2 Core scripts
+
+Game.cs
+    Node2D — Main
+    Attached: Yes
+    This is the root application coordinator.
+
+GameState.cs
+    No node attachment.
+    Plain runtime state object owned/used by Game and Core systems.
+
+GameTime.cs
+    No node attachment.
+    Plain runtime time/state service. It does not need an independent scene node.
+
+EventBus.cs
+    Node — EventBus runtime service, normally created as a child of Main/Game.
+    Attached: Yes, when the event bus is instantiated as a scene-tree service.
+
+
+4.3 Managers
+
+ResourceManager.cs
+    Node — ResourceManager
+    Attached: Yes
+    Central owner of logical resource lifecycle and transfers.
+
+WorkerManager.cs
+    Node — WorkerManager
+    Attached: Yes
+    Central owner of the worker roster and worker lifecycle.
+
+MachineManager.cs
+    Node — MachineManager
+    Attached: Yes
+    Central owner of machine registration and lifecycle.
+
+Only these three scripts are centralized managers. Other systems must not be turned into additional global managers merely for convenience.
+
+
+4.4 World and environment
+
+World.cs
+    Node2D — World
+    Attached: Yes
+    Top-level owner of the spatial gameplay world.
+
+WorldGrid.cs
+    Node — WorldGrid
+    Attached: Yes
+    Child/service node of World or Mine containing authoritative grid state.
+
+Terrain.cs
+    TileMapLayer (or the project-equivalent TileMap node if required by the chosen Godot version)
+    Attached: Yes
+    Owns terrain/tile presentation and terrain-facing scene representation. It does not own mining rules.
+
+Mine.cs
+    Node2D — Mine
+    Attached: Yes
+    Represents a mine area within World.
+
+ParallaxBackgroundController.cs
+    Node2D — ParallaxBackgroundController
+    Attached: Yes
+    Presentation controller for the scripted parallax background and active camera.
+
+ParallaxLayerController.cs
+    Node2D — ParallaxLayerController
+    Attached: Yes
+    One child node per parallax layer. Controls that layer's depth factor and optional wrapping.
+
+Camera2D
+    Godot built-in node; no custom script required by the current architecture.
+    ParallaxBackgroundController references the active camera rather than replacing camera responsibilities.
+
+
+4.5 Workers
+
+Worker.cs
+    CharacterBody2D — Worker
+    Attached: Yes
+    Physical/visual worker entity.
+
+WorkerAI.cs
+    No separate node by default.
+    Runtime worker decision-making component used by Worker and WorkerManager.
+
+WorkerJob.cs
+    No node attachment.
+    Job/data object describing work assigned to a worker.
+
+WorkerMovement.cs
+    No separate node by default.
+    Worker movement component operating on Worker's CharacterBody2D.
+
+WorkerInventory.cs
+    No separate node by default.
+    Worker inventory state/service owned by the worker domain.
+
+If WorkerMovement or WorkerAI later requires independent Godot lifecycle processing, it may become a child Node, but this is not the default architecture.
+
+
+4.6 Resources and physical resource objects
+
+GameResource.cs
+    Node2D — resource scene root when a physical resource is represented in the world.
+    Attached: Yes for physical resource scenes.
+    Represents the logical identity/state of one resource while allowing a scene representation.
+
+ResourceData.cs
+    No node attachment.
+    Static/configurable resource definition.
+
+ResourceType.cs
+    No node attachment.
+    Enum/type definition.
+
+ResourceStack.cs
+    No node attachment.
+    Lightweight logical quantity/type container.
+
+Stone.tscn / Gem.tscn
+    Root: Node2D with GameResource.cs.
+    Add physics child nodes when required by implementation.
+
+Logical resources that are not currently represented physically in the world must not create unnecessary nodes.
+
+
+4.7 Physics
+
+PhysicsWorld.cs
+    Node — PhysicsWorld
+    Attached: Yes when the physics subsystem is active as a runtime service.
+
+ResourcePhysics.cs
+    No separate node by default.
+    Resource-specific physics logic used by the physics system and physical resource entities.
+
+PhysicsBody.cs
+    No separate node by default.
+    Shared physics-state/helper abstraction. Actual physical scene bodies use Godot physics nodes such as CharacterBody2D, RigidBody2D, StaticBody2D, or Area2D as appropriate.
+
+
+4.8 Mining
+
+MiningSystem.cs
+    Node — MiningSystem
+    Attached: Yes
+    Runtime mining system.
+
+MiningJob.cs
+    No node attachment.
+    Job data/operation description used by MiningSystem and JobSystem.
+
+Dynamite.cs
+    Area2D — Dynamite
+    Attached: Yes
+    Physical/interactive explosive gameplay object.
+
+
+4.9 Logistics
+
+LogisticsSystem.cs
+    Node — LogisticsSystem
+    Attached: Yes
+    Runtime logistics coordination system.
+
+JobSystem.cs
+    Node — JobSystem
+    Attached: Yes
+    Generic job scheduling/assignment mechanism shared by domain systems.
+
+TransportJob.cs
+    No node attachment.
+    Transport job data object.
+
+Storage.cs
+    Node2D — Storage
+    Attached: Yes when represented as a world storage building/object.
+    Storage state may be backed by plain data internally.
+
+
+4.10 Machines
+
+Machine.cs
+    Node2D — Machine scene root
+    Attached: Yes
+    Base world representation for a machine.
+
+ProcessingMachine.cs
+    Node2D — ProcessingMachine
+    Attached: Yes
+    Specialized machine implementation for processing resources.
+
+MachineRecipe.cs
+    No node attachment.
+    Static/configurable recipe data.
+
+ProcessingMachine.tscn
+    Root: ProcessingMachine Node2D with ProcessingMachine.cs.
+    Machine.cs may be used as the base scene/script abstraction if inheritance is implemented.
+
+
+4.11 Economy
+
+EconomySystem.cs
+    Node — EconomySystem
+    Attached: Yes
+    Runtime economy rules.
+
+Market.cs
+    Node — Market
+    Attached: Yes when the market has runtime state/events in the scene tree.
+    It is a system-level runtime object, not a global manager.
+
+GemMarket.cs
+    Node — GemMarket
+    Attached: Yes when implemented as the runtime gem-market specialization.
+
+SellingSystem.cs
+    Node — SellingSystem
+    Attached: Yes
+    Runtime selling operations.
+
+
+4.12 Progression
+
+UpgradeSystem.cs
+    Node — UpgradeSystem
+    Attached: Yes
+    Runtime upgrade logic.
+
+UnlockSystem.cs
+    Node — UnlockSystem
+    Attached: Yes
+    Runtime unlock logic.
+
+PrestigeSystem.cs
+    Node — PrestigeSystem
+    Attached: Yes
+    Runtime prestige logic.
+
+
+4.13 Simulation
+
+SimulationSystem.cs
+    Node — SimulationSystem
+    Attached: Yes
+    Owns/co-ordinates simulation updates and tick execution.
+
+SimulationTick.cs
+    No node attachment.
+    Tick data/value object.
+
+StatisticsSystem.cs
+    Node — StatisticsSystem
+    Attached: Yes
+    Runtime statistics collection/aggregation service.
+
+
+4.14 Save
+
+SaveSystem.cs
+    Node — SaveSystem
+    Attached: Yes when active as a runtime save service under Game.
+
+SaveData.cs
+    No node attachment.
+    Serializable save-state data object.
+
+
+4.15 UI
+
+MainUI.cs
+    Control — MainUI
+    Attached: Yes.
+
+WorkerUI.cs
+    Control — WorkerUI
+    Attached: Yes.
+
+MarketUI.cs
+    Control — MarketUI
+    Attached: Yes.
+
+UpgradeUI.cs
+    Control — UpgradeUI
+    Attached: Yes.
+
+PrestigeUI.cs
+    Control — PrestigeUI
+    Attached: Yes.
+
+UI scripts are presentation/controllers. They read state and send user intent to gameplay systems; they do not become owners of gameplay rules.
+
+
+5. Planned scene organization
 -----------------------------
 
 Scenes/
 ├── main.tscn
+│   └── Main — Node2D [Game.cs]
+│
 ├── World/
 │   ├── World.tscn
+│   │   └── World — Node2D [World.cs]
+│   │
 │   ├── Mine.tscn
+│   │   └── Mine — Node2D [Mine.cs]
+│   │
 │   └── Warehouse.tscn
+│       └── Storage — Node2D [Storage.cs]
+│
 ├── Workers/
 │   └── Worker.tscn
+│       └── Worker — CharacterBody2D [Worker.cs]
+│
 ├── Machines/
-│   ├── ProcessingMachine.tscn
-│   └── ...
+│   └── ProcessingMachine.tscn
+│       └── ProcessingMachine — Node2D [ProcessingMachine.cs]
+│
 ├── Resources/
 │   ├── Stone.tscn
+│   │   └── Stone — Node2D [GameResource.cs]
 │   └── Gem.tscn
+│       └── Gem — Node2D [GameResource.cs]
+│
 └── UI/
     ├── MainUI.tscn
+    │   └── MainUI — Control [MainUI.cs]
     ├── WorkerUI.tscn
+    │   └── WorkerUI — Control [WorkerUI.cs]
     ├── MarketUI.tscn
+    │   └── MarketUI — Control [MarketUI.cs]
     ├── UpgradeUI.tscn
+    │   └── UpgradeUI — Control [UpgradeUI.cs]
     └── PrestigeUI.tscn
+        └── PrestigeUI — Control [PrestigeUI.cs]
 
 The current project uses Scenes/main.tscn. Do not create an unnecessary Main/ subfolder unless the project later needs multiple main-scene files.
 
@@ -210,21 +580,59 @@ The main world presentation should contain a scripted parallax background behind
 
 Planned visual layering:
 
-Camera2D
-└── ParallaxBackgroundController
-    ├── ParallaxLayerController — far background / sky
-    ├── ParallaxLayerController — mid-distance environment
-    └── ParallaxLayerController — near background elements
-        ↓
-    Gameplay world
-    ├── Terrain
-    ├── Workers
-    ├── Machines
-    ├── Resources
-    └── Sand Tower
+Main — Node2D [Game.cs]
+├── Managers — Node
+│   ├── ResourceManager — Node [ResourceManager.cs]
+│   ├── WorkerManager — Node [WorkerManager.cs]
+│   └── MachineManager — Node [MachineManager.cs]
+├── Runtime Systems — Node
+│   ├── EventBus — Node [EventBus.cs]
+│   ├── SimulationSystem — Node [SimulationSystem.cs]
+│   ├── StatisticsSystem — Node [StatisticsSystem.cs]
+│   ├── PhysicsWorld — Node [PhysicsWorld.cs]
+│   ├── MiningSystem — Node [MiningSystem.cs]
+│   ├── LogisticsSystem — Node [LogisticsSystem.cs]
+│   ├── JobSystem — Node [JobSystem.cs]
+│   ├── EconomySystem — Node [EconomySystem.cs]
+│   ├── SellingSystem — Node [SellingSystem.cs]
+│   ├── UpgradeSystem — Node [UpgradeSystem.cs]
+│   ├── UnlockSystem — Node [UnlockSystem.cs]
+│   ├── PrestigeSystem — Node [PrestigeSystem.cs]
+│   └── SaveSystem — Node [SaveSystem.cs]
+├── Camera2D
+├── ParallaxBackgroundController — Node2D [ParallaxBackgroundController.cs]
+│   ├── FarLayer — Node2D [ParallaxLayerController.cs]
+│   ├── MidLayer — Node2D [ParallaxLayerController.cs]
+│   └── NearLayer — Node2D [ParallaxLayerController.cs]
+├── World — Node2D [World.cs]
+│   ├── WorldGrid — Node [WorldGrid.cs]
+│   ├── Terrain — TileMapLayer [Terrain.cs]
+│   ├── Mine — Node2D [Mine.cs]
+│   ├── Workers
+│   │   └── Worker instances — CharacterBody2D [Worker.cs]
+│   ├── Machines
+│   │   └── Machine instances — Node2D [Machine.cs / ProcessingMachine.cs]
+│   └── Resources
+│       └── Physical resource instances — Node2D [GameResource.cs]
+└── UI — Control [MainUI.cs]
+
+The exact runtime system grouping can be adjusted when the main scene is built, but the three-manager boundary and script ownership must remain unchanged.
 
 
-5. Naming and organization rules
+6. Node attachment rules
+------------------------
+
+- Every script that inherits from Node/Node2D/Control/CharacterBody2D/etc. is expected to have a corresponding Godot node when that runtime role is active.
+- A script that does not inherit from a Godot Node should normally not be attached to a scene node.
+- Do not create empty nodes solely to attach helper/data classes.
+- Prefer one meaningful script per scene root when a script represents that object's primary behavior.
+- Child components such as WorkerAI, WorkerMovement, and WorkerInventory remain plain C# components unless they genuinely require independent Godot lifecycle processing.
+- Runtime systems may be grouped under non-scripted Node containers for scene organization.
+- The three managers are the only centralized manager scripts.
+- Scene composition belongs to Godot scenes; gameplay ownership remains in the C# architecture.
+
+
+7. Naming and organization rules
 --------------------------------
 
 - Use PascalCase for C# script and scene names, except the existing project entry scene main.tscn.
@@ -233,7 +641,7 @@ Camera2D
 - Keep logical resource data separate from physical resource simulation.
 - Keep gameplay data separate from visual assets.
 - Keep UI presentation separate from gameplay rules.
-- Keep background artwork in Assets/Backgrounds/ once that folder is created.
+- Keep background artwork in Assets/Backgrounds/.
 - Keep scripted parallax controllers in Scripts/World/.
 - Avoid creating folders only for theoretical future files when an existing folder already represents the correct domain.
 - When a new system is introduced, update this document and TechnicalArchitecture.txt together.
@@ -241,7 +649,7 @@ Camera2D
 - Prefer the smallest useful number of scripts; split responsibilities when real complexity appears.
 
 
-6. Architecture boundary
+8. Architecture boundary
 -------------------------
 
 Use TechnicalArchitecture.txt for:
@@ -259,6 +667,8 @@ Use this document for:
 - physical folder placement
 - script organization
 - scene organization
+- Godot node types
+- script-to-node attachment
 - asset/data organization
 
-The two documents should remain synchronized when architecture or physical organization changes.
+The two documents should remain synchronized when architecture, script responsibilities, or physical Godot organization changes.
