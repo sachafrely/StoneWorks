@@ -4,9 +4,9 @@ Purpose
 -------
 This document defines where project files belong in the Godot project.
 
-TechnicalArchitecture.txt is authoritative for system responsibilities, ownership, communication, and interactions. This document is authoritative for physical Godot folder organization and planned file locations.
+TechnicalArchitecture.txt is authoritative for system responsibilities, ownership, communication, and interactions. This document is authoritative for physical Godot folder organization.
 
-This is a planned structure. Empty folders and planned scripts do not mean the corresponding functionality has been implemented.
+The structure below distinguishes the current repository skeleton from planned locations. Empty/planned folders and planned scripts do not mean the corresponding functionality has been implemented.
 
 
 1. Current project structure
@@ -18,6 +18,10 @@ stone-works/
 │   └── main.tscn
 ├── Scripts/
 │   ├── Core/
+│   │   ├── EventBus.cs
+│   │   ├── Game.cs
+│   │   ├── GameState.cs
+│   │   └── GameTime.cs
 │   ├── Economy/
 │   ├── Logistics/
 │   ├── Machines/
@@ -33,7 +37,6 @@ stone-works/
 ├── Assets/
 │   ├── Sprites/
 │   ├── Tilesets/
-│   ├── Backgrounds/
 │   ├── Workers/
 │   ├── Machines/
 │   ├── Resources/
@@ -44,10 +47,12 @@ stone-works/
 │   ├── Upgrades/
 │   └── Markets/
 ├── Audio/
-│   ├── Music/
-│   └── SFX/
 ├── Saves/
 └── Docs/
+
+The current repository contains the Core C# skeleton and the planned domain folders. Most gameplay systems are not implemented yet.
+
+Background artwork is a planned asset category; Assets/Backgrounds/ should be created when the first parallax background asset is added.
 
 Additional Godot/project files such as .godot metadata and configuration files may exist; they are not part of the gameplay organization described here.
 
@@ -68,7 +73,7 @@ Data/
     Static/configurable game definitions such as resources, machines, upgrades, and markets.
 
 Audio/
-    Music and sound effects.
+    Music and sound effects, organized into Music/ and SFX/ as assets are added.
 
 Saves/
     Save-related runtime data or save-file support. Do not put gameplay rules here.
@@ -229,7 +234,7 @@ The exact number, artwork, layer ordering and movement strengths are still to be
 - Keep logical resource data separate from physical resource simulation.
 - Keep gameplay data separate from visual assets.
 - Keep UI presentation separate from gameplay rules.
-- Keep background artwork in Assets/Backgrounds/.
+- Keep background artwork in Assets/Backgrounds/ once that folder is created.
 - Keep scripted parallax controllers in Scripts/World/ because they coordinate world presentation and camera-relative background movement.
 - Keep parallax artwork and visual composition in the relevant Godot scene.
 - Avoid creating folders only for theoretical future files when an existing folder already represents the correct domain.
