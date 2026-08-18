@@ -1,5 +1,5 @@
 using Godot;
 
-public partial class Resource : Node
+public partial class GameResource : Node
 {
 }
