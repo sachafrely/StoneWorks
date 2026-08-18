@@ -118,7 +118,7 @@ Scripts/
 │   └── WorkerInventory.cs
 │
 ├── Resources/
-│   ├── Resource.cs
+│   ├── GameResource.cs
 │   ├── ResourceData.cs
 │   ├── ResourceType.cs
 │   └── ResourceStack.cs
@@ -172,6 +172,8 @@ Scripts/
     └── PrestigeUI.cs
 
 The three managers intentionally live in Scripts/Managers. Older comment-only Manager.cs placeholders inside Resources, Workers and Machines are deprecated references and are not part of the active architecture.
+
+GameResource.cs is the logical resource entity. It is deliberately named after its C# class to keep the file/class relationship clear and avoid confusion with Godot.Resource.
 
 ParallaxBackgroundController coordinates scripted parallax presentation and the active camera. ParallaxLayerController controls one visual layer's depth factor and optional wrapping. These scripts are presentation infrastructure, not gameplay systems.
 
