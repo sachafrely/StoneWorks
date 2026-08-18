@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Chooses suitable work for a worker from available jobs.
-// Rules: Selects based on role, priority, distance, carrying capacity, availability, and current situation. It does not create gameplay rules for the jobs.
-// Dependencies: JobSystem, WorkerJob, Worker state, WorkerMovement/Inventory as needed for suitability.
-// Communication: Requests/accepts jobs; delegates execution to the worker and relevant systems.
-// Must not depend on: Economy or UI internals.
+// Role: Chooses what an available worker should do and coordinates execution of the worker's current job.
+// Responsibilities: Evaluate job options, accept/cancel jobs, transition worker states, and request movement/actions from dedicated components.
+// Rules: WorkerAI decides intent; it does not implement pathfinding, inventory storage, mining rules, or machine processing.
+// Dependencies: Worker, JobSystem, WorkerJob, WorkerMovement, WorkerInventory, EventBus.
+// Communication: Requests jobs from JobSystem, commands WorkerMovement, and reacts to job/resource/world events.
+// Planned functions: FindJob(), EvaluateJob(job), AcceptJob(job), CancelJob(), Update(delta), ExecuteCurrentJob(), HandleJobCompleted(), HandleJobFailed().
+// Future considerations: Include role restrictions, distance, priority, carrying capacity, and current worker state in job selection.

@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Collects gameplay statistics for production, sales, workers, machines, resources, and progression.
-// Rules: Observes system events/state; it must not become the owner of the gameplay values it measures.
-// Dependencies: EventBus and read-only interfaces/data from relevant systems; GameTime for sampling cadence.
-// Communication: Subscribes to events such as ResourceCreated, GemProduced, GemSold, WorkerUnlocked, and PrestigePerformed; UI reads prepared statistics.
-// Must not depend on: UI implementation, rendering, or direct mutation of gameplay systems.
+// Role: Collects and exposes gameplay statistics without owning the gameplay systems that produce them.
+// Responsibilities: Track totals, rates, play time, production, sales, resources processed, worker counts, and other useful metrics.
+// Rules: Statistics are observers/recorders; they should not change gameplay state.
+// Dependencies: EventBus and stable domain event payloads; GameTime for elapsed time.
+// Communication: Subscribes to events such as ResourceCreated, GemProduced, GemSold, WorkerUnlocked, MachineFinished, and PrestigePerformed.
+// Planned functions: RecordEvent(event), Update(delta), GetStatistic(id), GetRate(id), ResetRunStatistics(), SavePersistentStatistics(), GetHistory(id).
+// Future considerations: Separate lifetime statistics from current-run statistics and avoid expensive per-frame sampling when an event is sufficient.

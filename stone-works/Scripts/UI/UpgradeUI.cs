@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Displays available upgrades, costs, levels, and upgrade controls.
-// Rules: UI only requests upgrades; UpgradeSystem validates costs and applies effects.
-// Dependencies: UpgradeSystem/UnlockSystem read-only state, economy/money view, EventBus.
-// Communication: Upgrade button → UpgradeSystem command; upgrade/unlock events → UI refresh.
-// Must not depend on: direct worker/machine/mining internals or physics.
+// Role: Displays available upgrades, their costs, levels, effects, and unlock state.
+// Responsibilities: Build/refresh upgrade entries, show affordability, and send purchase commands.
+// Rules: UpgradeUI does not calculate authoritative costs/effects and never edits progression state directly.
+// Dependencies: UpgradeSystem, EconomySystem read/command interfaces, UnlockSystem, EventBus.
+// Communication: Reads upgrade state and reacts to UpgradePurchased, MoneyChanged, and Unlock events.
+// Planned functions: Refresh(), RefreshUpgrade(id), ShowCost(id), ShowEffect(id), IsAffordable(id), HandlePurchase(id), OnUpgradePurchased().
+// Future considerations: Keep UI generic so new upgrades can be added from data without new hard-coded controls.

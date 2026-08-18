@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Static/configuration data describing resource properties.
-// Rules: Defines data, not runtime ownership. Resource definitions should be data-driven where practical.
-// Dependencies: ResourceType; may later load from Data/Resources.
-// Communication: Resource and ResourceManager consume definitions when creating/managing resources.
-// Must not depend on: Physics, workers, economy, UI, or scene nodes.
+// Role: Static/data definition describing a resource type and its properties.
+// Responsibilities: Store display identity, category, base value, physical properties, processing behavior, and storage rules.
+// Rules: ResourceData is configuration, not runtime state. Keep it independent from individual Resource instances.
+// Dependencies: ResourceType and serializable primitive data only.
+// Communication: ResourceManager, ResourcePhysics, machines, markets, and UI read this data through stable accessors.
+// Planned functions: Validate(), GetBaseValue(), GetMass(), GetFriction(), GetBounciness(), IsPhysical(), IsSellable(), IsProcessable().
+// Future considerations: Keep balance values data-driven so economy and physics tuning do not require rewriting gameplay systems.

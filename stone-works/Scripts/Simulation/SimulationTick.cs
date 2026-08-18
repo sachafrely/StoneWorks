@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Represents one simulation update/tick and the timing context passed to systems.
-// Rules: Carries timing information; does not itself execute gameplay rules.
-// Dependencies: GameTime and simulation scheduling data.
-// Communication: SimulationSystem creates/provides ticks to systems according to their update cadence.
-// Must not depend on: UI, Economy implementation, or concrete entity behavior.
+// Role: Defines one scheduled simulation update and its timing metadata.
+// Responsibilities: Represent a tick interval, elapsed time, and which system/update category should run.
+// Rules: SimulationTick is scheduling data; it should not implement the actual gameplay update.
+// Dependencies: None or lightweight system identifiers.
+// Communication: SimulationSystem creates/advances ticks and dispatches them to the appropriate systems.
+// Planned functions: Advance(delta), IsDue(), Reset(), GetElapsed(), GetInterval(), MarkExecuted().
+// Future considerations: Different systems may use different tick intervals to reduce Android CPU usage.

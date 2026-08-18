@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Main presentation/controller layer for the game UI.
-// Rules: Displays state and sends player commands. It must never directly modify gameplay internals.
-// Dependencies: Read-only views/interfaces from GameState and major systems; EventBus for updates.
-// Communication: UI command -> system API; system event/state -> UI refresh.
-// Must not depend on: private fields of workers, machines, resources, physics, or direct scene manipulation of gameplay rules.
+// Role: Coordinates the visible gameplay UI and connects UI controls to high-level game commands.
+// Responsibilities: Display core resources/progress, manage main panels, route player actions, and refresh visible state.
+// Rules: UI displays state and sends commands; it must not contain economy, mining, worker, machine, or physics rules.
+// Dependencies: GameState/read models, EventBus, Window/UI components, progression/economy systems through clear interfaces.
+// Communication: Subscribes to relevant events and sends commands to systems rather than modifying their internals.
+// Planned functions: Initialize(), Refresh(), OpenWindow(id), CloseWindow(id), HandleCommand(command), UpdateResourceDisplay(), UpdateProgressDisplay().
+// Future considerations: Define window ownership/conflicts centrally so settings, statistics, upgrades, market, and prestige panels cannot fight over visibility.

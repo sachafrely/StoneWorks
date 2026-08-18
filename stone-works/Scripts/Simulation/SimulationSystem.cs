@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Coordinates passage of game time and schedules system updates without becoming a giant gameplay system.
-// Rules: Not everything updates every frame. Physics/movement may use physics ticks; machines/markets/statistics use appropriate timers/events; idle calculations use larger intervals.
-// Dependencies: GameTime, SimulationTick, major gameplay systems, EventBus.
-// Communication: Drives Worker, Mining, Machine, Economy, Physics, and Statistics updates through clear interfaces.
-// Must not depend on: UI presentation or detailed rules owned by individual systems.
+// Role: Coordinates the progression of simulation time and calls the major systems that need periodic updates.
+// Responsibilities: Advance simulation ticks, apply simulation speed/pause, schedule systems at appropriate frequencies, and coordinate offline progression.
+// Rules: SimulationSystem coordinates; it should not contain the internal rules of mining, workers, machines, economy, or physics.
+// Dependencies: GameTime, Worker/Job systems, MiningSystem, MachineManager, Economy/Market, PhysicsWorld, StatisticsSystem, EventBus.
+// Communication: Provides time steps to systems and reacts to pause/speed changes.
+// Planned functions: Start(), Stop(), Update(delta), RunTick(delta), RunOfflineSimulation(duration), SetSimulationSpeed(multiplier), Pause(), Resume().
+// Future considerations: Not every system needs a per-frame update. Physics/workers can tick frequently; markets/statistics can update less often; idle production can use larger analytical steps.

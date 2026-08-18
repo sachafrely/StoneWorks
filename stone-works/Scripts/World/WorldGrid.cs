@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Authoritative grid gameplay data for mine terrain and occupancy.
-// Rules: Represents cell state such as empty, stone, dirt, ore, occupied, and destroyed. Visual tiles are only a representation.
-// Dependencies: ResourceType/domain data where terrain cells produce resources; World owns the grid.
-// Communication: Mining/Terrain query and mutate the grid through controlled operations.
-// Must not depend on: Godot tile rendering, UI, worker AI, or physics implementation.
+// Role: Represents the mine's discrete grid structure and provides fast coordinate/cell operations.
+// Responsibilities: Convert world positions to grid coordinates, store cell data, validate bounds, and support region queries.
+// Rules: WorldGrid owns grid representation only; mining rules and resource generation remain in their systems.
+// Dependencies: Grid dimensions/cell data and basic math types.
+// Communication: Terrain and Mine use WorldGrid; MiningSystem/Dynamite use its query and mutation interface; WorkerMovement uses traversability queries.
+// Planned functions: WorldToGrid(position), GridToWorld(cell), IsInside(cell), GetCell(cell), SetCell(cell, value), ClearCell(cell), GetNeighbors(cell), GetRegion(bounds).
+// Future considerations: Use compact storage and efficient region operations because explosions may modify many cells at once and the mine may become large.

@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Serializable representation of game state that must survive save/load.
-// Rules: Contains data, not gameplay behavior. Explicitly distinguish persistent progression from resettable run state for prestige.
-// Dependencies: Serializable projections of GameState, Resource/Worker/Machine/World/Economy/Progression state as required.
-// Communication: SaveSystem builds/restores SaveData; systems consume restored state during initialization.
-// Must not depend on: Godot scene nodes, UI, physics bodies, or transient runtime-only objects.
+// Role: Serializable representation of all persistent game data required to restore a save.
+// Responsibilities: Store player economy, progression, workers, upgrades, world progression, prestige state, market state, and save metadata.
+// Rules: SaveData contains data only; it must not execute gameplay or reference scene nodes.
+// Dependencies: Serializable domain structures such as GameState, ResourceStack, upgrade data, and worker state.
+// Communication: SaveSystem creates/loads SaveData; GameState applies the loaded values.
+// Planned functions: CreateFromGameState(state), ApplyToGameState(state), ValidateVersion(), Migrate(oldVersion), GetSaveVersion().
+// Future considerations: Version the schema from the beginning so future changes can migrate old saves safely.

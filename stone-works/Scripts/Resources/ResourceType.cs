@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Stable domain identifiers for resource categories/types.
-// Rules: Keep resource identity separate from physical representation and visual assets. Current game design defines six gem colors; do not add a seventh without updating the docs.
-// Dependencies: None; this is a foundational domain type.
-// Communication: Used by Resource, ResourceData, ResourceStack, markets, recipes, and terrain/resource generation.
-// Must not depend on: Godot nodes, UI, physics, or economy implementation.
+// Role: Enumerates the stable categories/types of resources used by StoneWorks.
+// Responsibilities: Provide a single identifier for stones, six gem colors, sand, money, and future materials as the design evolves.
+// Rules: ResourceType should remain stable because saves, data files, and systems may depend on these identifiers.
+// Dependencies: None.
+// Communication: ResourceData, ResourceManager, Economy, Machines, Storage, and UI use ResourceType to identify resources without hard-coded strings.
+// Planned functions: IsGem(type), IsPhysical(type), IsCurrency(type), IsProcessable(type), GetDisplayName(type), GetDefaultData(type).
+// Future considerations: Avoid changing enum values casually after saves exist; use explicit IDs if the project moves to external data files.

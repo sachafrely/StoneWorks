@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Coordinates creation, registration, lookup, and logical lifecycle of resources.
-// Rules: Owns logical resource state only; physical bodies are delegated to PhysicsWorld/ResourcePhysics.
-// Dependencies: Resource, ResourceData, ResourceType, EventBus; PhysicsWorld/ResourcePhysics through a clear boundary when spawning physical resources.
-// Communication: Mining and machines request resource creation; logistics/storage consume resources; emits ResourceCreated and related events.
-// Must not depend on: UI or rendering logic.
+// Role: Central owner of runtime resources and resource creation/removal rules.
+// Responsibilities: Create resources, register/remove them, find resources, track totals, and coordinate logical-to-physical creation.
+// Rules: ResourceManager owns resource lifecycle; it does not decide market prices or worker movement.
+// Dependencies: Resource, ResourceData, ResourceType, ResourceStack, ResourcePhysics, EventBus.
+// Communication: Mining and machines request resource creation; logistics/storage request transfer/removal; physics handles physical representation.
+// Planned functions: CreateResource(type, amount, position), RemoveResource(resource), GetResource(id), FindResources(type), GetTotal(type), Transfer(resource, destination), ClearTemporaryResources().
+// Future considerations: Support pooled objects and aggregated resources to keep Android performance stable at high object counts.

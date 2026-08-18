@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Calculates prestige rewards, resets temporary progression, preserves permanent progression, and starts a new run.
-// Rules: Prestige is progression logic, not worker/mining/economy implementation. Reset boundaries must be explicit in GameState/SaveData.
-// Dependencies: GameState, UpgradeSystem/UnlockSystem, Economy state, EventBus, SaveSystem boundary.
-// Communication: UI requests prestige; system validates and applies reset/reward, then emits PrestigePerformed.
-// Must not depend on: UI internals, physics, or worker implementation details.
+// Role: Applies prestige/rebirth rules and manages permanent versus resettable progression.
+// Responsibilities: Calculate prestige rewards, validate prestige requirements, reset temporary progression, and preserve permanent upgrades.
+// Rules: Prestige owns reset/progression rules; it does not implement mining, economy, or worker behavior.
+// Dependencies: GameState, Economy/Progression data, EventBus, SaveSystem.
+// Communication: UI requests a prestige action; PrestigeSystem validates and applies it; EventBus announces PrestigePerformed.
+// Planned functions: CanPrestige(), CalculatePrestigeReward(), PerformPrestige(), ResetRunState(), PreservePermanentProgression(), GetPrestigeCount().
+// Future considerations: The persistent Sand Tower and permanent upgrades must be explicitly separated from resettable run state.

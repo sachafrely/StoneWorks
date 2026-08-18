@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Small temporary inventory carried by a worker.
-// Rules: Enforces carrying capacity and resource stack changes; does not own warehouse storage or selling rules.
-// Dependencies: Resource, ResourceStack, ResourceType; Worker owns/uses this inventory.
-// Communication: Logistics uses inventory state during pickup/delivery; resource events may be emitted after successful transfers.
-// Must not depend on: Economy, UI, or physics internals.
+// Role: Inventory owned by an individual worker for temporary resource carrying.
+// Responsibilities: Add/remove carried resources, enforce carrying capacity, expose contents, and support transfer to storage or machines.
+// Rules: WorkerInventory owns carried quantities, not warehouse storage and not market value.
+// Dependencies: ResourceStack, ResourceType/ResourceManager.
+// Communication: WorkerAI/logistics requests pickup/drop-off; Storage receives delivered stacks; ResourceManager validates resource identity when needed.
+// Planned functions: Add(stack), Remove(type, amount), Has(type, amount), GetAmount(type), GetCapacity(), GetFreeCapacity(), Clear(), TransferTo(destination).
+// Future considerations: Keep capacity small and explicit; support mixed-resource carrying only if the gameplay design requires it.

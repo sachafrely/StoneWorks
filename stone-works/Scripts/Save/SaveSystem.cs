@@ -1,6 +1,8 @@
 // StoneWorks — ROLE / RULES / DEPENDENCIES
-// Role: Saves and loads authoritative game state.
-// Rules: Serialize only stable game data; do not serialize transient scene/physics objects. Save/load must preserve explicit GameState boundaries.
-// Dependencies: GameState, SaveData, filesystem/persistence layer, GameTime for timestamps/offline calculation where required.
-// Communication: Game initializes/loads through SaveSystem; periodic/manual saves capture current state; loaded data is handed back to systems.
-// Must not depend on: UI, rendering, or individual gameplay implementation details beyond serializable state contracts.
+// Role: Owns saving/loading of persistent game state and save-file lifecycle.
+// Responsibilities: Save, load, validate, version, migrate, and recover save data; expose safe save/load operations to Game.
+// Rules: SaveSystem serializes state; it does not own gameplay rules and must never save scene/node references.
+// Dependencies: SaveData, GameState, filesystem/serialization layer, EventBus if save notifications are needed.
+// Communication: Game requests load/save; SaveSystem returns validated state; UI may request manual save but does not manipulate files directly.
+// Planned functions: Save(), Load(), HasSave(), DeleteSave(), ValidateSave(), MigrateSave(), CreateBackup(), GetSavePath().
+// Future considerations: Auto-save timing, crash-safe writes, corruption recovery, multiple slots, and offline timestamp handling should be explicit.
