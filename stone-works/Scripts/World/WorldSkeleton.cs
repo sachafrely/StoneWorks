@@ -1,8 +1,2 @@
-// StoneWorks — WORLD
-// Role: Owns the gameplay world and coordinates world-level objects.
-// Skeleton only.
-using Godot;
-
-public partial class WorldSkeleton : Node2D
-{
-}
+// Deprecated placeholder from the initial skeleton pass.
+// The canonical World class is World.cs.
