@@ -1,0 +1,147 @@
+STONEWORKS — BALANCING
+=======================
+
+Purpose
+-------
+This document defines concrete numerical production, resource-conversion and scale values for StoneWorks.
+
+These values are balancing rules rather than technical implementation details. Gameplay design belongs in GameDesignDocument.txt; system ownership and implementation belong in TechnicalArchitecture.txt.
+
+
+1. MINING YIELD
+---------------
+
+Destroying 1 mine tile produces:
+- 1 Stone
+
+Therefore:
+- 10 destroyed mine tiles = 10 Stones
+- 100 destroyed mine tiles = 100 Stones
+
+
+2. STONE GRINDING
+-----------------
+
+Grinding 1 Stone in the processing machine always produces:
+- 2 Sand
+
+In addition, the Stone has a chance to produce 1 Gem of a specific color.
+
+Gem probability per color:
+- Red: 2%
+- Orange: 2%
+- Yellow: 2%
+- Green: 2%
+- Blue: 2%
+- Purple: 2%
+
+Total Gem chance per Stone:
+- 12%
+
+If no Gem is produced:
+- 88% chance to produce a third Sand
+
+Therefore, every Stone produces exactly 2 Sand, plus one of:
+- 1 Gem of one of the six colors
+- 1 additional Sand
+
+Average output per Stone:
+- 2.00 guaranteed Sand
+- 0.88 additional Sand
+- 0.12 Gems
+- 2.88 Sand expected on average
+
+
+3. RESOURCE SIZE
+----------------
+
+Sand is considerably smaller than Stone in physical representation.
+
+This size difference should be visually obvious and should allow substantially more Sand to accumulate in the Sand collection area than Stones could occupy in the same physical space.
+
+The exact physical dimensions remain an implementation/balance parameter and are not fixed by this document.
+
+
+4. SAND COLLECTOR
+-----------------
+
+The Sand collector converts accumulated Sand into Sand Tower progress.
+
+Conversion rate:
+- 1,000 Sand = 1 Tower Pixel
+
+Therefore:
+- 10,000 Sand = 10 Tower Pixels
+- 100,000 Sand = 100 Tower Pixels
+- 1,000,000 Sand = 1,000 Tower Pixels
+
+
+5. SAND TOWER SCALE
+-------------------
+
+Tower width:
+- 100 pixels
+
+Tower height:
+- 1 pixel = 1 meter of tower height
+
+Therefore:
+- 100 pixels high = 100 meters
+- 1,000 pixels high = 1,000 meters
+
+The Tower is persistent long-term visual progression and continues growing as Sand is contributed.
+
+
+6. BASELINE PRODUCTION RELATIONSHIPS
+-------------------------------------
+
+For N destroyed mine tiles:
+- N Stones are produced.
+- 2N Sand is guaranteed after grinding all Stones.
+- 0.88N additional Sand is expected.
+- 0.12N Gems are expected.
+
+Expected total Sand:
+- 2.88N
+
+Expected Tower Pixels:
+- 2.88N / 1,000
+
+Expected Tower height in meters:
+- 2.88N / 1,000 meters
+
+Examples:
+
+100 destroyed tiles:
+- 100 Stones
+- 288 expected Sand
+- 12 expected Gems
+- 0.288 expected Tower Pixels
+
+1,000 destroyed tiles:
+- 1,000 Stones
+- 2,880 expected Sand
+- 120 expected Gems
+- 2.88 expected Tower Pixels
+
+10,000 destroyed tiles:
+- 10,000 Stones
+- 28,800 expected Sand
+- 1,200 expected Gems
+- 28.8 expected Tower Pixels
+
+
+7. BALANCING STATUS
+-------------------
+
+Confirmed baseline values:
+- 1 destroyed mine tile → 1 Stone
+- 1 Stone → 2 guaranteed Sand
+- Each of 6 Gem colors → 2% chance per Stone
+- Total Gem chance → 12% per Stone
+- No-Gem result → 88% chance for a third Sand
+- 1,000 Sand → 1 Tower Pixel
+- Tower width → 100 pixels
+- 1 Tower Pixel → 1 meter of height
+
+These values should be treated as the current balancing baseline and changed here when balancing decisions change.
