@@ -59,7 +59,7 @@ Scenes/
     Godot scene composition. Scenes represent visual/physical entities and their node structure. Core gameplay rules belong in systems, not scenes.
 
 Scripts/
-    C# gameplay code, systems, entities, controllers, and shared infrastructure. Scripts are grouped by responsibility/domain.
+    C# gameplay code, systems, entities, controllers, presentation infrastructure, and shared infrastructure. Scripts are grouped by responsibility/domain.
 
 Assets/
     Visual assets such as sprites, tilesets, background layers, machine art, worker art, resource art, and UI art.
@@ -91,20 +91,24 @@ Scripts/
 │   ├── World.cs
 │   ├── WorldGrid.cs
 │   ├── Terrain.cs
-│   └── Mine.cs
+│   ├── Mine.cs
+│   ├── ParallaxBackgroundController.cs
+│   └── ParallaxLayerController.cs
 │
 ├── Workers/
 │   ├── Worker.cs
 │   ├── WorkerAI.cs
 │   ├── WorkerJob.cs
 │   ├── WorkerMovement.cs
-│   └── WorkerInventory.cs
+│   ├── WorkerInventory.cs
+│   └── WorkerManager.cs
 │
 ├── Resources/
 │   ├── Resource.cs
 │   ├── ResourceData.cs
 │   ├── ResourceType.cs
-│   └── ResourceStack.cs
+│   ├── ResourceStack.cs
+│   └── ResourceManager.cs
 │
 ├── Physics/
 │   ├── PhysicsWorld.cs
@@ -125,7 +129,8 @@ Scripts/
 ├── Machines/
 │   ├── Machine.cs
 │   ├── ProcessingMachine.cs
-│   └── MachineRecipe.cs
+│   ├── MachineRecipe.cs
+│   └── MachineManager.cs
 │
 ├── Economy/
 │   ├── EconomySystem.cs
@@ -154,11 +159,16 @@ Scripts/
     ├── UpgradeUI.cs
     └── PrestigeUI.cs
 
-No dedicated ParallaxBackground.cs is planned initially. The parallax background is presentation/scene composition and should use Godot's parallax/camera functionality rather than introducing gameplay code for it. A dedicated script should only be added later if the background develops real runtime behavior that cannot be handled by scene configuration.
+The three baseline managers are:
+- ResourceManager.cs — resource lifecycle, lookup, totals, transfer, and logical/physical resource coordination.
+- WorkerManager.cs — worker lifecycle, collection, role assignment, availability, and worker summaries.
+- MachineManager.cs — machine lifecycle, collection, lookup, placement, and machine-wide coordination.
+
+These managers are intentional architecture components. They must remain focused on lifecycle/ownership/lookup responsibilities and must not become general-purpose gameplay god objects.
+
+ParallaxBackgroundController.cs coordinates scripted parallax presentation and the active camera. ParallaxLayerController.cs controls one visual layer's depth factor and optional wrapping. These scripts are presentation infrastructure, not gameplay systems.
 
 Only create a planned script when its functionality is actually needed. The planned list is an architectural map, not a requirement to create every file immediately.
-
-There is intentionally no ResourceManager, WorkerManager, or MachineManager in the baseline map. A manager may be added later if a concrete lifecycle, ownership, or lookup requirement justifies it.
 
 JobSystem belongs to Logistics because it is the generic job mechanism used by domain systems such as Mining and Logistics. TechnicalArchitecture.txt defines the responsibility boundary.
 
@@ -189,15 +199,15 @@ Scenes/
 
 The current project uses Scenes/main.tscn. Do not create an unnecessary Main/ subfolder unless the project later needs multiple main-scene files.
 
-The main world presentation should contain a parallax background layer behind gameplay. This can be composed directly in main.tscn or the appropriate World scene using Godot's parallax nodes/camera setup.
+The main world presentation should contain a scripted parallax background behind gameplay. The background controller should reference the active Camera2D and coordinate child ParallaxLayerController nodes.
 
 Planned visual layering:
 
-Camera
-└── Parallax background
-    ├── Far background / sky
-    ├── Mid-distance environment
-    └── Near background elements
+Camera2D
+└── ParallaxBackgroundController
+    ├── ParallaxLayerController — far background / sky
+    ├── ParallaxLayerController — mid-distance environment
+    └── ParallaxLayerController — near background elements
         ↓
     Gameplay world
     ├── Terrain
@@ -206,7 +216,9 @@ Camera
     ├── Resources
     └── Sand Tower
 
-The exact number, artwork and movement strength of the background layers are still to be decided.
+Each layer receives a configurable parallax factor. Optional looping can be enabled for backgrounds that need continuous horizontal or vertical coverage.
+
+The exact number, artwork, layer ordering and movement strengths are still to be decided.
 
 
 5. Naming and organization rules
@@ -218,7 +230,8 @@ The exact number, artwork and movement strength of the background layers are sti
 - Keep gameplay data separate from visual assets.
 - Keep UI presentation separate from gameplay rules.
 - Keep background artwork in Assets/Backgrounds/.
-- Keep parallax scene composition in the relevant Godot scene rather than creating a script without a concrete runtime responsibility.
+- Keep scripted parallax controllers in Scripts/World/ because they coordinate world presentation and camera-relative background movement.
+- Keep parallax artwork and visual composition in the relevant Godot scene.
 - Avoid creating folders only for theoretical future files when an existing folder already represents the correct domain.
 - When a new system is introduced, update this document and TechnicalArchitecture.txt together.
 - Do not move a script merely to match a planned list; classify it by its actual responsibility.
@@ -236,11 +249,13 @@ Use TechnicalArchitecture.txt for questions such as:
 - When should events/interfaces be used?
 - What responsibilities belong to an entity versus a system?
 - How do Godot scenes communicate with runtime systems?
+- What are the responsibilities of ResourceManager, WorkerManager, and MachineManager?
 
 Use this document for questions such as:
 - Which Godot folder should contain this file?
 - Where should a new C# system be placed?
 - Where should a scene, asset, or data definition live?
 - Where should parallax background artwork and scene composition live?
+- Where should scripted parallax controllers live?
 
 The two documents should remain synchronized when the architecture or physical organization changes.
