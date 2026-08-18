@@ -6,7 +6,7 @@ This document defines where project files belong in the Godot project.
 
 TechnicalArchitecture.txt is authoritative for system responsibilities, ownership, communication, and interactions. This document is authoritative for physical Godot folder organization.
 
-The structure below distinguishes the current repository skeleton from planned locations. Empty/planned folders and planned scripts do not mean the corresponding functionality has been implemented.
+The repository now contains the planned C# script skeletons. Skeletons define class/file boundaries only; they do not mean the gameplay functionality is implemented.
 
 
 1. Current project structure
@@ -22,6 +22,10 @@ stone-works/
 │   │   ├── Game.cs
 │   │   ├── GameState.cs
 │   │   └── GameTime.cs
+│   ├── Managers/
+│   │   ├── ResourceManager.cs
+│   │   ├── WorkerManager.cs
+│   │   └── MachineManager.cs
 │   ├── Economy/
 │   ├── Logistics/
 │   ├── Machines/
@@ -50,11 +54,9 @@ stone-works/
 ├── Saves/
 └── Docs/
 
-The current repository contains the Core C# skeleton and the planned domain folders. Most gameplay systems are not implemented yet.
+All listed domain folders now contain their planned C# skeletons. Parallax controllers are also present as presentation infrastructure.
 
 Background artwork is a planned asset category; Assets/Backgrounds/ should be created when the first parallax background asset is added.
-
-Additional Godot/project files such as .godot metadata and configuration files may exist; they are not part of the gameplay organization described here.
 
 
 2. Folder responsibilities
@@ -66,6 +68,9 @@ Scenes/
 Scripts/
     C# gameplay code, systems, entities, controllers, presentation infrastructure, and shared infrastructure. Scripts are grouped by responsibility/domain.
 
+Managers/
+    The three intentional centralized lifecycle/ownership managers: ResourceManager, WorkerManager, and MachineManager.
+
 Assets/
     Visual assets such as sprites, tilesets, background layers, machine art, worker art, resource art, and UI art.
 
@@ -73,17 +78,17 @@ Data/
     Static/configurable game definitions such as resources, machines, upgrades, and markets.
 
 Audio/
-    Music and sound effects, organized into Music/ and SFX/ as assets are added.
+    Music and sound effects.
 
 Saves/
     Save-related runtime data or save-file support. Do not put gameplay rules here.
 
 Docs/
-    Project documentation. TechnicalArchitecture.txt defines architecture; this document defines physical organization.
+    Project documentation.
 
 
-3. Planned script structure
----------------------------
+3. Script structure
+-------------------
 
 Scripts/
 ├── Core/
@@ -91,6 +96,11 @@ Scripts/
 │   ├── GameState.cs
 │   ├── GameTime.cs
 │   └── EventBus.cs
+│
+├── Managers/
+│   ├── ResourceManager.cs
+│   ├── WorkerManager.cs
+│   └── MachineManager.cs
 │
 ├── World/
 │   ├── World.cs
@@ -105,15 +115,13 @@ Scripts/
 │   ├── WorkerAI.cs
 │   ├── WorkerJob.cs
 │   ├── WorkerMovement.cs
-│   ├── WorkerInventory.cs
-│   └── WorkerManager.cs
+│   └── WorkerInventory.cs
 │
 ├── Resources/
 │   ├── Resource.cs
 │   ├── ResourceData.cs
 │   ├── ResourceType.cs
-│   ├── ResourceStack.cs
-│   └── ResourceManager.cs
+│   └── ResourceStack.cs
 │
 ├── Physics/
 │   ├── PhysicsWorld.cs
@@ -134,8 +142,7 @@ Scripts/
 ├── Machines/
 │   ├── Machine.cs
 │   ├── ProcessingMachine.cs
-│   ├── MachineRecipe.cs
-│   └── MachineManager.cs
+│   └── MachineRecipe.cs
 │
 ├── Economy/
 │   ├── EconomySystem.cs
@@ -164,18 +171,11 @@ Scripts/
     ├── UpgradeUI.cs
     └── PrestigeUI.cs
 
-The three baseline managers are:
-- ResourceManager.cs — resource lifecycle, lookup, totals, transfer, and logical/physical resource coordination.
-- WorkerManager.cs — worker lifecycle, collection, role assignment, availability, and worker summaries.
-- MachineManager.cs — machine lifecycle, collection, lookup, placement, and machine-wide coordination.
+The three managers intentionally live in Scripts/Managers. Older comment-only Manager.cs placeholders inside Resources, Workers and Machines are deprecated references and are not part of the active architecture.
 
-These managers are intentional architecture components. They must remain focused on lifecycle/ownership/lookup responsibilities and must not become general-purpose gameplay god objects.
+ParallaxBackgroundController coordinates scripted parallax presentation and the active camera. ParallaxLayerController controls one visual layer's depth factor and optional wrapping. These scripts are presentation infrastructure, not gameplay systems.
 
-ParallaxBackgroundController.cs coordinates scripted parallax presentation and the active camera. ParallaxLayerController.cs controls one visual layer's depth factor and optional wrapping. These scripts are presentation infrastructure, not gameplay systems.
-
-Only create a planned script when its functionality is actually needed. The planned list is an architectural map, not a requirement to create every file immediately.
-
-JobSystem belongs to Logistics because it is the generic job mechanism used by domain systems such as Mining and Logistics. TechnicalArchitecture.txt defines the responsibility boundary.
+JobSystem belongs to Logistics because it is the generic job mechanism used by domain systems such as Mining and Logistics.
 
 
 4. Planned scene organization
@@ -221,22 +221,18 @@ Camera2D
     ├── Resources
     └── Sand Tower
 
-Each layer receives a configurable parallax factor. Optional looping can be enabled for backgrounds that need continuous horizontal or vertical coverage.
-
-The exact number, artwork, layer ordering and movement strengths are still to be decided.
-
 
 5. Naming and organization rules
----------------------------------
+--------------------------------
 
 - Use PascalCase for C# script and scene names, except the existing project entry scene main.tscn.
 - Keep scripts grouped by the system/domain they primarily belong to.
+- Keep the three centralized managers in Scripts/Managers.
 - Keep logical resource data separate from physical resource simulation.
 - Keep gameplay data separate from visual assets.
 - Keep UI presentation separate from gameplay rules.
 - Keep background artwork in Assets/Backgrounds/ once that folder is created.
-- Keep scripted parallax controllers in Scripts/World/ because they coordinate world presentation and camera-relative background movement.
-- Keep parallax artwork and visual composition in the relevant Godot scene.
+- Keep scripted parallax controllers in Scripts/World/.
 - Avoid creating folders only for theoretical future files when an existing folder already represents the correct domain.
 - When a new system is introduced, update this document and TechnicalArchitecture.txt together.
 - Do not move a script merely to match a planned list; classify it by its actual responsibility.
@@ -246,21 +242,21 @@ The exact number, artwork, layer ordering and movement strengths are still to be
 6. Architecture boundary
 -------------------------
 
-This document deliberately does not repeat the detailed architecture rules and communication flows from TechnicalArchitecture.txt.
+Use TechnicalArchitecture.txt for:
+- system responsibilities
+- ownership boundaries
+- communication rules
+- system interactions
+- the three-manager policy
+- Core vs Simulation
+- logical vs physical resources
+- JobSystem vs LogisticsSystem
+- scene/C# communication
 
-Use TechnicalArchitecture.txt for questions such as:
-- Which system owns a piece of data or gameplay logic?
-- Which systems may communicate directly?
-- When should events/interfaces be used?
-- What responsibilities belong to an entity versus a system?
-- How do Godot scenes communicate with runtime systems?
-- What are the responsibilities of ResourceManager, WorkerManager, and MachineManager?
+Use this document for:
+- physical folder placement
+- script organization
+- scene organization
+- asset/data organization
 
-Use this document for questions such as:
-- Which Godot folder should contain this file?
-- Where should a new C# system be placed?
-- Where should a scene, asset, or data definition live?
-- Where should parallax background artwork and scene composition live?
-- Where should scripted parallax controllers live?
-
-The two documents should remain synchronized when the architecture or physical organization changes.
+The two documents should remain synchronized when architecture or physical organization changes.
