@@ -1,0 +1,57 @@
+STONEWORKS — UI REQUIREMENTS
+=============================
+
+Purpose
+-------
+This document records UI behavior requirements that should remain consistent across the game.
+Detailed gameplay rules belong in GameDesignDocument.txt. Technical ownership belongs in TechnicalArchitecture.txt.
+
+
+1. WINDOW SCROLLING
+-------------------
+
+UI windows must support scrolling whenever their content can exceed the visible window area.
+
+This applies especially to:
+- Settings windows
+- Upgrade windows
+- Market/selling windows
+- Prestige windows
+- Statistics windows
+- Worker panels
+- Any future window with variable or expandable content
+
+Scrolling should:
+- keep the window itself within the available screen area
+- allow the player to reach all content without requiring the window to grow beyond the screen
+- work correctly on different Android portrait screen sizes
+- preserve usable touch targets
+- avoid moving or resizing unrelated UI elements
+
+Scrolling is a UI presentation/interaction concern and must not contain gameplay rules.
+
+
+2. RESPONSIVE UI
+----------------
+
+UI windows should adapt to the available screen size rather than relying on fixed dimensions whenever practical.
+
+Content-heavy windows should prefer a scrollable content area over increasing the overall window beyond the available viewport.
+
+Exact responsive sizing and anchoring rules remain implementation decisions to be finalized while testing on multiple Android aspect ratios.
+
+
+3. CURRENT UI OPEN QUESTIONS
+----------------------------
+
+- What is the final visual style for every window?
+- Which windows should be modal and which should allow the simulation to continue visibly behind them?
+- Which windows pause the simulation, if any?
+- What is the exact navigation structure between windows?
+- Which windows need tabs/categories?
+- Which settings require confirmation, immediate application, or reset-to-default controls?
+- What is the final behavior for very long lists or dynamically generated content?
+- What are the minimum touch-target sizes for the final Android UI?
+- Which UI elements need animation, sound, haptic feedback, or visual confirmation?
+- What information should remain visible while a window is open?
+- What is the final responsive layout behavior across the supported Android aspect ratios?
