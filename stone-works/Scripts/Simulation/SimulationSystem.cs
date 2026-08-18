@@ -1,7 +1,7 @@
 // StoneWorks — SIMULATION SYSTEM
-// Role: Owns simulation update scheduling and coordinates the order/cadence in which gameplay systems advance.
-// Rules: Coordinates simulation but does not implement mining, worker AI, machine recipes, economy, or physics rules.
-// Dependencies: GameTime and the domain systems that explicitly participate in simulation ticks.
+// Role: Owns the simulation update loop, scheduling, and ordering of systems that advance gameplay.
+// Rules: Coordinates updates but does not implement mining, worker AI, machine recipes, economy, or physics rules itself.
+// Dependencies: SimulationTick and the systems that explicitly participate in simulation updates.
 // Skeleton only; simulation scheduling is not implemented yet.
 using Godot;
 
