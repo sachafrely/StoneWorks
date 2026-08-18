@@ -3,206 +3,372 @@ STONEWORKS — ROADMAP
 
 Purpose
 -------
-This is the implementation roadmap. The GDD defines intended gameplay; TechnicalArchitecture.txt defines system ownership and communication; GodotProjectStructure.txt defines physical file organization.
+This is the practical implementation roadmap for building StoneWorks from the current architecture/documentation skeleton toward a playable Android game.
 
-Status labels:
-- DONE = defined/decided or completed where explicitly stated
-- NEXT = immediate implementation target
-- TODO = planned implementation work
-- OPEN = design decision still required
+The GDD defines gameplay and design goals.
+TechnicalArchitecture.txt defines system ownership and communication.
+GodotProjectStructure.txt defines folders, scenes, nodes and script attachments.
+Balancing.txt defines the current concrete resource-production rules.
+
+The roadmap is intentionally sequential and simple. Do not implement the entire planned architecture at once. Build one small working layer at a time and verify it before moving on.
 
 
-1. FOUNDATION
+CURRENT STATE
 -------------
 
 DONE
-- Define the core gameplay loop.
-- Define Android portrait target and overall world layout.
-- Define six gem colors.
-- Define Mining and Logistics worker roles.
-- Define physical resource concept.
-- Define grid-based mine concept.
-- Define explosive mining concept.
-- Define machine processing concept.
-- Define logistics/job architecture.
-- Define dynamic gem market concept.
-- Define three-manager architecture: ResourceManager, WorkerManager, MachineManager.
-- Define scripted parallax background architecture.
-- Create GitHub repository.
-- Create Godot project.
-- Create documentation set.
-- Create Godot folder skeleton.
-- Create initial main.tscn.
-- Create initial Core C# skeleton: Game, GameState, GameTime, EventBus.
+- Core gameplay concept and main gameplay loop defined.
+- Android portrait target defined.
+- GDD established and cleaned up.
+- Technical architecture established.
+- Godot project structure established.
+- Three-manager architecture established:
+  - ResourceManager
+  - WorkerManager
+  - MachineManager
+- Script roles and Godot node attachments documented.
+- Planned C# script skeletons created.
+- Main Godot scene created.
+- Scripted parallax architecture defined.
+- Current balancing rules documented.
+
+The project is still an architecture/skeleton project. The next work should be implementation, not more large-scale restructuring unless a real problem appears.
 
 
-2. CURRENT IMPLEMENTATION STATE
--------------------------------
+IMPLEMENTATION ORDER
+--------------------
 
-The project is currently an architecture/documentation skeleton. The Core C# files are role/architecture placeholders; the domain systems are planned but not yet implemented.
+1. MAKE THE PROJECT RUN
+-----------------------
 
 NEXT
-- Establish the runtime Game startup path.
-- Connect GameState and GameTime.
-- Establish the initial SimulationSystem.
-- Establish the World / Mine / WorldGrid foundation.
-- Implement the three baseline managers when their lifecycle responsibilities become needed.
+- Make Game.cs the working application entry point.
+- Initialize GameState and GameTime.
+- Initialize EventBus.
+- Make the project start cleanly without placeholder errors.
+
+Goal: Open the project and have a clean, working runtime foundation.
 
 
-3. WORLD AND MINING
--------------------
-
-TODO
-- Implement World.
-- Implement Mine and WorldGrid.
-- Implement terrain representation.
-- Implement mining terrain destruction.
-- Implement dynamite and explosion rules.
-- Generate one Stone per destroyed mine tile.
-- Spawn physical Stones.
-- Implement terrain/resource collision.
-- Implement mine progression/expansion model.
-
-
-4. RESOURCE AND PHYSICS SYSTEMS
--------------------------------
-
-TODO
-- Implement Resource, ResourceData, ResourceType and ResourceStack.
-- Implement ResourceManager.
-- Implement PhysicsWorld.
-- Implement ResourcePhysics / physical resource bodies.
-- Implement Stone and Gem physical interactions.
-- Implement resource pickup and conversion between physical and logical state.
-- Establish Android-scale performance limits.
-
-
-5. WORKERS, JOBS AND LOGISTICS
-------------------------------
-
-TODO
-- Implement Worker and WorkerManager.
-- Implement WorkerAI.
-- Implement WorkerMovement and terrain climbing.
-- Implement WorkerInventory.
-- Implement WorkerJob.
-- Implement generic JobSystem.
-- Implement MiningJob.
-- Implement LogisticsSystem.
-- Implement TransportJob.
-- Implement Storage and six gem warehouses.
-- Implement worker role assignment UI.
-
-
-6. MACHINES AND PROCESSING
---------------------------
-
-TODO
-- Implement Machine and MachineManager.
-- Implement ProcessingMachine.
-- Implement MachineRecipe.
-- Implement Grinder processing.
-- Apply balancing rules from Balancing.txt:
-  - 1 Stone → 2 guaranteed Sand
-  - 2% chance for each gem color
-  - 88% chance for a third Sand when no Gem is produced
-- Spawn physical Gems/Sand where appropriate.
-- Implement machine upgrades.
-
-
-7. ECONOMY AND PROGRESSION
---------------------------
-
-TODO
-- Implement EconomySystem.
-- Implement Market and GemMarket.
-- Implement SellingSystem.
-- Implement worker purchases/progression.
-- Implement UpgradeSystem.
-- Implement UnlockSystem.
-- Implement PrestigeSystem.
-- Implement persistent Sand Tower progression.
-
-OPEN
-- Final market update/recovery numbers.
-- Prestige reset scope and permanent progression.
-- Long-term goal/endgame.
-
-
-8. SIMULATION, IDLE AND SAVE
-----------------------------
-
-TODO
-- Implement SimulationSystem and SimulationTick.
-- Implement StatisticsSystem.
-- Implement offline progression calculation.
-- Implement SaveSystem and SaveData.
-- Define save frequency and corruption/backup handling.
-
-OPEN
-- Exact offline progression rules.
-- Maximum offline duration.
-
-
-9. UI, AUDIO AND PRESENTATION
------------------------------
-
-TODO
-- Implement MainUI.
-- Implement worker, market, upgrade and prestige UI.
-- Implement statistics UI.
-- Implement settings UI.
-- Implement scripted ParallaxBackgroundController.
-- Implement ParallaxLayerController.
-- Add parallax artwork in Assets/Backgrounds/.
-- Implement Sand Tower presentation.
-- Add audio and feedback effects.
-- Implement responsive Android layout.
-- Implement onboarding/tutorial.
-
-
-10. BALANCING AND POLISH
+2. BUILD THE BASIC WORLD
 ------------------------
 
 TODO
-- Balance production and progression.
-- Balance worker costs and machine upgrades.
-- Balance market behavior.
-- Balance prestige progression.
-- Test physical-object limits on Android.
-- Optimize physics and resource spawning.
-- Optimize rendering and scene updates.
-- Add particles, sound and visual polish.
-- Testing and bug fixing.
-- Final balancing.
-- Release-ready Android build.
+- Implement World.
+- Implement Mine.
+- Implement WorldGrid.
+- Implement basic Terrain.
+- Place the world correctly in the portrait scene.
+
+Goal: See a basic playable mine/world on screen.
 
 
-11. DESIGN QUESTIONS TO RESOLVE BEFORE FINALIZATION
-----------------------------------------------------
+3. ADD THE SIMULATION LOOP
+--------------------------
+
+TODO
+- Implement SimulationSystem.
+- Implement SimulationTick.
+- Connect simulation updates to GameTime.
+- Keep the tick system independent from UI presentation.
+
+Goal: Have one reliable place where simulation time advances.
+
+
+4. IMPLEMENT THE RESOURCE FOUNDATION
+------------------------------------
+
+TODO
+- Implement ResourceType.
+- Implement ResourceData.
+- Implement ResourceStack.
+- Implement GameResource.
+- Implement ResourceManager.
+- Define the boundary between logical resources and physical resource objects.
+
+Goal: The game can create, own and track Stones, Gems and Sand logically.
+
+
+5. ADD PHYSICAL STONES
+----------------------
+
+TODO
+- Create Stone.tscn.
+- Give Stones appropriate Godot physics bodies.
+- Implement PhysicsWorld.
+- Implement ResourcePhysics.
+- Make Stones fall, collide and settle.
+- Test a reasonable number of Stones on Android.
+
+Goal: Destroying something is eventually able to produce visible physical Stones.
+
+
+6. IMPLEMENT EXPLOSIVE MINING
+-----------------------------
+
+TODO
+- Implement MiningSystem.
+- Implement MiningJob.
+- Implement Dynamite.
+- Define the explosion area/shape.
+- Destroy affected mine-grid cells.
+- Produce exactly 1 Stone per destroyed mine tile.
+- Spawn Stones at the destroyed locations.
+
+Goal: Player action → explosion → destroyed terrain → physical Stones.
+
+
+7. IMPLEMENT THE THREE MANAGERS
+--------------------------------
+
+TODO
+- Implement ResourceManager as resource owner/lifecycle authority.
+- Implement WorkerManager as worker roster/lifecycle authority.
+- Implement MachineManager as machine registration/lifecycle authority.
+- Connect them to Game without creating additional generic managers.
+
+Goal: Central ownership works in practice and matches the architecture document.
+
+
+8. IMPLEMENT WORKERS
+---------------------
+
+TODO
+- Implement Worker.
+- Implement WorkerAI.
+- Implement WorkerMovement.
+- Implement WorkerInventory.
+- Implement basic terrain-aware movement/climbing.
+- Spawn the initial two workers.
+
+Goal: Workers exist physically in the mine and can move around it.
+
+
+9. IMPLEMENT JOBS AND LOGISTICS
+-------------------------------
+
+TODO
+- Implement JobSystem.
+- Implement WorkerJob.
+- Implement MiningJob integration with workers.
+- Implement LogisticsSystem.
+- Implement TransportJob.
+- Implement Storage.
+- Implement the six gem warehouse destinations.
+
+Goal: Workers can receive work, perform it and transport resources to destinations.
+
+
+10. IMPLEMENT THE PROCESSING MACHINE
+-------------------------------------
+
+TODO
+- Implement Machine.
+- Implement ProcessingMachine.
+- Implement MachineRecipe.
+- Implement MachineManager integration.
+- Create the Grinder scene.
+- Accept Stones as input.
+
+Goal: Stones can physically/logically enter a working processing machine.
+
+
+11. IMPLEMENT THE CURRENT GRINDING RULE
+----------------------------------------
+
+TODO
+- 1 Stone always produces 2 Sand.
+- Each of the 6 gem colors has a 2% chance.
+- If no Gem is produced, there is an 88% chance to produce a third Sand.
+- Create the correct logical outputs.
+- Spawn physical Gems/Sand where appropriate.
+
+Goal: The complete first mining → processing resource chain works.
+
+
+12. IMPLEMENT LOGISTICS END-TO-END
+-----------------------------------
+
+TODO
+- Logistics workers collect produced resources.
+- Gems are delivered to the correct color warehouse.
+- Sand is delivered to the Sand collector.
+- Worker inventories correctly represent carried resources.
+- Resource ownership changes correctly during pickup and delivery.
+
+Goal: Resources can travel through the complete physical gameplay loop without manual debugging intervention.
+
+
+13. IMPLEMENT ECONOMY AND SELLING
+---------------------------------
+
+TODO
+- Implement EconomySystem.
+- Implement Market.
+- Implement GemMarket.
+- Implement SellingSystem.
+- Allow stored Gems to be sold for Money.
+- Implement the basic dynamic-price concept.
+
+OPEN BEFORE FINAL BALANCING
+- Exact price changes.
+- Price recovery speed.
+- Random fluctuation strength.
+
+Goal: Gems have a meaningful economic value.
+
+
+14. IMPLEMENT WORKER PURCHASES AND UPGRADES
+--------------------------------------------
+
+TODO
+- Implement worker purchasing.
+- Implement worker assignment between Mining and Logistics.
+- Implement UpgradeSystem.
+- Implement initial machine-speed upgrades.
+- Implement UnlockSystem where needed.
+
+Goal: Money can be spent to make the operation more effective.
+
+
+15. IMPLEMENT THE BASIC UI
+---------------------------
+
+TODO
+- Implement MainUI.
+- Implement resource/money display.
+- Implement WorkerUI.
+- Implement worker role assignment.
+- Implement basic machine/upgrade UI.
+- Implement basic market/selling UI.
+
+Goal: The player can understand and control the core gameplay without debug tools.
+
+
+16. IMPLEMENT SAND TOWER AND PRESENTATION
+------------------------------------------
+
+TODO
+- Implement Sand collection.
+- Implement persistent Sand Tower progression.
+- Implement ParallaxBackgroundController.
+- Implement ParallaxLayerController.
+- Add the first background layers to Assets/Backgrounds/.
+- Keep parallax completely separate from gameplay state.
+
+Goal: The game starts to look like the intended StoneWorks experience.
+
+
+17. IMPLEMENT PRESTIGE
+----------------------
+
+TODO
+- Implement PrestigeSystem.
+- Define what resets.
+- Define what remains permanent.
+- Define prestige currency/progression.
+- Connect the Sand Tower to persistent long-term progression.
 
 OPEN
-- Long-term mine structure: reset, expansion, or multiple areas.
+- Final reset scope.
+- Permanent upgrade structure.
+- Long-term goal/endgame.
+
+Goal: The game has a repeatable long-term progression loop.
+
+
+18. IMPLEMENT IDLE, OFFLINE AND SAVE SYSTEMS
+---------------------------------------------
+
+TODO
+- Implement StatisticsSystem.
+- Implement SaveData.
+- Implement SaveSystem.
+- Save the essential gameplay state.
+- Implement offline progression calculation.
+- Show the player the result of returning from offline time.
+
+OPEN
+- Maximum offline duration.
+- Exact offline production rules.
+- Save backup/corruption handling.
+
+Goal: Progress survives closing the game and idle play actually works.
+
+
+19. FINISH UI, AUDIO AND ONBOARDING
+------------------------------------
+
+TODO
+- Finish MarketUI.
+- Finish UpgradeUI.
+- Finish PrestigeUI.
+- Add Statistics UI.
+- Add Settings UI.
+- Implement tutorial/onboarding.
+- Add sound effects and feedback.
+- Add important visual effects.
+- Implement responsive Android layout.
+
+Goal: A new player can understand and enjoy the game without developer assistance.
+
+
+20. BALANCE, OPTIMIZE AND TEST
+------------------------------
+
+TODO
+- Balance mining speed and dynamite costs.
+- Balance worker costs and assignments.
+- Balance machine processing.
+- Balance gem prices and market behavior.
+- Balance upgrades and prestige.
+- Test physical-object limits.
+- Optimize physics, resource spawning and rendering.
+- Test multiple Android screen sizes.
+- Test save/load and offline progression.
+- Fix bugs and remove temporary/debug systems.
+
+Goal: Stable, understandable and performant gameplay on the target Android device range.
+
+
+21. FINAL DESIGN DECISIONS
+--------------------------
+
+OPEN
+Resolve these before the corresponding systems are considered final:
+- Long-term mine structure: expansion, reset or multiple areas.
 - Final Stone/gem design beyond the current balancing baseline.
 - Meaningful player decisions beyond worker assignment, dynamite and upgrades.
 - Warehouse capacity and upgrades.
 - Worker abilities beyond worker count.
 - Additional machines required for the final game.
 - Sand Tower gameplay effects, if any.
-- Final monetization model and rewarded-ad implementation.
-- Tutorial/onboarding flow.
+- Final monetization and rewarded-ad model.
 - Final audio/music direction.
 
+Do not block early implementation on low-priority decisions. Decide each question when its system becomes necessary.
 
-12. ARCHITECTURE RULE
----------------------
 
-Do not create the entire planned script tree just because it is documented.
-Implement the smallest useful system for the current roadmap step, while preserving the documented ownership boundaries.
+WORKING RULES
+-------------
 
-The three baseline managers remain intentional architecture components:
-- ResourceManager
-- WorkerManager
-- MachineManager
+1. Finish the current roadmap step before starting the next major step.
+2. Keep each implementation small enough to test.
+3. Prefer working vertical slices over large amounts of disconnected code.
+4. Keep gameplay ownership consistent with TechnicalArchitecture.txt.
+5. Keep scene/node organization consistent with GodotProjectStructure.txt.
+6. Use the three managers only for their defined ownership responsibilities.
+7. Do not create new generic managers just to make code easier to find.
+8. Keep logical resources separate from physical resource bodies.
+9. Keep UI responsible for presentation and player commands, not gameplay rules.
+10. Keep the scripted parallax system separate from gameplay and simulation state.
+11. Test performance early, especially physical Stones/Gems and worker counts.
+12. Update the documentation when an architectural or design decision actually changes.
 
-Do not add additional generic managers unless a concrete lifecycle/ownership requirement justifies one.
+
+CURRENT NEXT STEP
+------------------
+
+NEXT: Step 1 — Make the project run.
+
+Start with Game.cs, GameState, GameTime and EventBus. Once the application foundation runs cleanly, move to Step 2 and build the basic World/Mine/WorldGrid.
