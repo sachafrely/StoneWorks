@@ -1,65 +1,208 @@
-Define core gameplay loop DONE
-Define map and world structure
-Define resources and 6 gem colors
-Define worker roles and behavior
-Define mining system
-Define grid-based mine terrain
-Define dynamite mining
-Define resource physics and collisions
-Define worker movement and climbing
-Define logistics and job system
-Define warehouse and storage
-Define machines and processing
-Define gem sorting
-Define selling system
-Define fluctuating gem market DONE
-Define worker progression
-Define prestige/rebirth system
-Define idle/offline progression
-Define Android UI and full-screen strategy
+STONEWORKS — ROADMAP
+====================
 
-Create Godot project structure
-Set up GitHub repository
-Create basic scene structure
-Create core game manager
-Create game state system
-Create basic stone/gem data
-Create stone/gem spawning system
-Create stone/gem physics
-Create ground/terrain collision
-Create mining machine
-Create mining process
-Generate stones during mining
-Generate gems during mining
-Make stones/gems fall from the machine
-Add stone/gem-to-stone/gem collisions
-Add stone/gem-to-ground collisions
-Create collection/output system
-Create gem rarity/types
-Create value/economy system
-Create storage/inventory
-Create selling system
-Create machine upgrades
-Create mining upgrades
-Create automation
-Create additional machines
-Create conveyors/transport
-Create sorting system
-Create gem processing/refining
-Create progression system
-Create unlock system
-Create money/resources UI
-Create machine UI
-Create upgrade UI
-Create inventory/storage UI
-Create statistics UI
-Add save/load system
-Add balancing and progression tuning
-Optimize physics and object spawning
-Optimize rendering/performance
-Add polish, particles and sound
-Mobile/Android controls if needed
-Testing and bug fixing
-Final balancing
-Release-ready build
-Core architecture goal
+Purpose
+-------
+This is the implementation roadmap. The GDD defines intended gameplay; TechnicalArchitecture.txt defines system ownership and communication; GodotProjectStructure.txt defines physical file organization.
+
+Status labels:
+- DONE = defined/decided or completed where explicitly stated
+- NEXT = immediate implementation target
+- TODO = planned implementation work
+- OPEN = design decision still required
+
+
+1. FOUNDATION
+-------------
+
+DONE
+- Define the core gameplay loop.
+- Define Android portrait target and overall world layout.
+- Define six gem colors.
+- Define Mining and Logistics worker roles.
+- Define physical resource concept.
+- Define grid-based mine concept.
+- Define explosive mining concept.
+- Define machine processing concept.
+- Define logistics/job architecture.
+- Define dynamic gem market concept.
+- Define three-manager architecture: ResourceManager, WorkerManager, MachineManager.
+- Define scripted parallax background architecture.
+- Create GitHub repository.
+- Create Godot project.
+- Create documentation set.
+- Create Godot folder skeleton.
+- Create initial main.tscn.
+- Create initial Core C# skeleton: Game, GameState, GameTime, EventBus.
+
+
+2. CURRENT IMPLEMENTATION STATE
+-------------------------------
+
+The project is currently an architecture/documentation skeleton. The Core C# files are role/architecture placeholders; the domain systems are planned but not yet implemented.
+
+NEXT
+- Establish the runtime Game startup path.
+- Connect GameState and GameTime.
+- Establish the initial SimulationSystem.
+- Establish the World / Mine / WorldGrid foundation.
+- Implement the three baseline managers when their lifecycle responsibilities become needed.
+
+
+3. WORLD AND MINING
+-------------------
+
+TODO
+- Implement World.
+- Implement Mine and WorldGrid.
+- Implement terrain representation.
+- Implement mining terrain destruction.
+- Implement dynamite and explosion rules.
+- Generate one Stone per destroyed mine tile.
+- Spawn physical Stones.
+- Implement terrain/resource collision.
+- Implement mine progression/expansion model.
+
+
+4. RESOURCE AND PHYSICS SYSTEMS
+-------------------------------
+
+TODO
+- Implement Resource, ResourceData, ResourceType and ResourceStack.
+- Implement ResourceManager.
+- Implement PhysicsWorld.
+- Implement ResourcePhysics / physical resource bodies.
+- Implement Stone and Gem physical interactions.
+- Implement resource pickup and conversion between physical and logical state.
+- Establish Android-scale performance limits.
+
+
+5. WORKERS, JOBS AND LOGISTICS
+------------------------------
+
+TODO
+- Implement Worker and WorkerManager.
+- Implement WorkerAI.
+- Implement WorkerMovement and terrain climbing.
+- Implement WorkerInventory.
+- Implement WorkerJob.
+- Implement generic JobSystem.
+- Implement MiningJob.
+- Implement LogisticsSystem.
+- Implement TransportJob.
+- Implement Storage and six gem warehouses.
+- Implement worker role assignment UI.
+
+
+6. MACHINES AND PROCESSING
+--------------------------
+
+TODO
+- Implement Machine and MachineManager.
+- Implement ProcessingMachine.
+- Implement MachineRecipe.
+- Implement Grinder processing.
+- Apply balancing rules from Balancing.txt:
+  - 1 Stone → 2 guaranteed Sand
+  - 2% chance for each gem color
+  - 88% chance for a third Sand when no Gem is produced
+- Spawn physical Gems/Sand where appropriate.
+- Implement machine upgrades.
+
+
+7. ECONOMY AND PROGRESSION
+--------------------------
+
+TODO
+- Implement EconomySystem.
+- Implement Market and GemMarket.
+- Implement SellingSystem.
+- Implement worker purchases/progression.
+- Implement UpgradeSystem.
+- Implement UnlockSystem.
+- Implement PrestigeSystem.
+- Implement persistent Sand Tower progression.
+
+OPEN
+- Final market update/recovery numbers.
+- Prestige reset scope and permanent progression.
+- Long-term goal/endgame.
+
+
+8. SIMULATION, IDLE AND SAVE
+----------------------------
+
+TODO
+- Implement SimulationSystem and SimulationTick.
+- Implement StatisticsSystem.
+- Implement offline progression calculation.
+- Implement SaveSystem and SaveData.
+- Define save frequency and corruption/backup handling.
+
+OPEN
+- Exact offline progression rules.
+- Maximum offline duration.
+
+
+9. UI, AUDIO AND PRESENTATION
+-----------------------------
+
+TODO
+- Implement MainUI.
+- Implement worker, market, upgrade and prestige UI.
+- Implement statistics UI.
+- Implement settings UI.
+- Implement scripted ParallaxBackgroundController.
+- Implement ParallaxLayerController.
+- Add parallax artwork in Assets/Backgrounds/.
+- Implement Sand Tower presentation.
+- Add audio and feedback effects.
+- Implement responsive Android layout.
+- Implement onboarding/tutorial.
+
+
+10. BALANCING AND POLISH
+------------------------
+
+TODO
+- Balance production and progression.
+- Balance worker costs and machine upgrades.
+- Balance market behavior.
+- Balance prestige progression.
+- Test physical-object limits on Android.
+- Optimize physics and resource spawning.
+- Optimize rendering and scene updates.
+- Add particles, sound and visual polish.
+- Testing and bug fixing.
+- Final balancing.
+- Release-ready Android build.
+
+
+11. DESIGN QUESTIONS TO RESOLVE BEFORE FINALIZATION
+----------------------------------------------------
+
+OPEN
+- Long-term mine structure: reset, expansion, or multiple areas.
+- Final Stone/gem design beyond the current balancing baseline.
+- Meaningful player decisions beyond worker assignment, dynamite and upgrades.
+- Warehouse capacity and upgrades.
+- Worker abilities beyond worker count.
+- Additional machines required for the final game.
+- Sand Tower gameplay effects, if any.
+- Final monetization model and rewarded-ad implementation.
+- Tutorial/onboarding flow.
+- Final audio/music direction.
+
+
+12. ARCHITECTURE RULE
+---------------------
+
+Do not create the entire planned script tree just because it is documented.
+Implement the smallest useful system for the current roadmap step, while preserving the documented ownership boundaries.
+
+The three baseline managers remain intentional architecture components:
+- ResourceManager
+- WorkerManager
+- MachineManager
+
+Do not add additional generic managers unless a concrete lifecycle/ownership requirement justifies one.
