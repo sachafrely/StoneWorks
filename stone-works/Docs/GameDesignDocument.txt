@@ -72,6 +72,8 @@ From left to right:
 3. Six gem warehouses
 4. Sand collection / Sand Tower area
 
+The world presentation will use a scripted parallax background behind the gameplay area. Multiple visual layers will move at different rates relative to the active camera to create depth. The parallax system is presentation infrastructure and must not become part of gameplay state or simulation rules.
+
 The mine uses a grid for terrain gameplay data. Its visible terrain is a rounded, attractive representation of that grid.
 
 The mine should support continued progression without requiring an infinitely long walk. The exact long-term mine-expansion/reset model is still undecided.
@@ -427,9 +429,12 @@ Visual direction:
 - satisfying explosions and physical motion
 - visually distinct gem colors
 - attractive rounded mine terrain/surface
+- layered scripted parallax background
 - persistent Sand Tower visible in the background
 
 The game should prioritize readability and visual satisfaction over excessive detail.
+
+The parallax background should use multiple configurable visual layers. Each layer has a depth/parallax factor and may optionally loop horizontally or vertically for continuous scenery. The parallax system is implemented through C# presentation scripts rather than relying exclusively on Godot's built-in parallax node behavior. It must remain independent of gameplay state.
 
 Gem rendering implementation is undecided: one reusable sprite tinted per gem color or separate sprites.
 
@@ -528,11 +533,12 @@ The authoritative technical documents define:
 - World / Mine / WorldGrid ownership
 - logical resources vs physical resource bodies
 - JobSystem vs LogisticsSystem
+- the three manager responsibilities: ResourceManager, WorkerManager and MachineManager
 - system responsibilities
 - communication rules
 - Godot scene/C# boundaries
 - save architecture
-- manager policy
+- scripted parallax presentation infrastructure
 
 See TechnicalArchitecture.txt for those decisions.
 
@@ -551,6 +557,7 @@ The GDD should describe desired gameplay behavior; it should not duplicate imple
 7. Performance on Android is a design constraint, not an afterthought.
 8. New systems should only be added when they create meaningful gameplay.
 9. Unconfirmed ideas should remain explicitly marked as undecided rather than becoming accidental requirements.
+10. Presentation systems such as the scripted parallax background must remain separate from gameplay state and simulation rules.
 
 
 28. OPEN DESIGN QUESTIONS
@@ -621,9 +628,11 @@ Confirmed direction:
 - six color-specific warehouses
 - dynamic gem selling concept
 - worker assignment
+- three managers: ResourceManager, WorkerManager and MachineManager
 - upgrades
 - prestige concept
 - persistent Sand Tower
+- layered scripted parallax background
 - offline progression
 - optional rewarded ads concept
 
