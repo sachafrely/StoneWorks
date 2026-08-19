@@ -3,6 +3,7 @@
 // Rules: Provides time state; it does not advance domain gameplay rules itself.
 // Dependencies: Godot/application time source and explicit simulation-time consumers.
 using Godot;
+using System;
 
 public partial class GameTime : Node
 {
@@ -30,7 +31,7 @@ public partial class GameTime : Node
 
     public void SetTimeScale(double timeScale)
     {
-        TimeScale = Mathf.Max(0.0, timeScale);
+        TimeScale = Math.Max(0.0, timeScale);
     }
 
     public void Reset()
