@@ -1,3 +1,6 @@
-[gd_scene format=3 uid="uid://drpv130pysyne"]
+[gd_scene load_steps=2 format=3 uid="uid://drpv130pysyne"]
 
-[node name="Main" type="Node2D" unique_id=1414154737]
+[ext_resource type="Script" path="res://Scripts/Core/Game.cs" id="1_game"]
+
+[node name="Game" type="Node" unique_id=1414154737]
+script = ExtResource("1_game")
